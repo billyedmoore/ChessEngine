@@ -14,11 +14,11 @@ Classes:
     Move - Represents the movement from one square to another
 """
 
+
 class GameState:
     """
-    The current state of the game including the Pieces and moves already made
+    The current state of the game including the pieces & the Moves already made
 
     Methods:
-        GameState(starting_position : string);
-
+        GameState(starting_position : string) (constructor)
     """
