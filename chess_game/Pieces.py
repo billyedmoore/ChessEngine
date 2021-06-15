@@ -18,7 +18,7 @@ class Piece(ABC):
     _moved = False
 
     @property
-    def position(self) -> tuple[int, int]:
+    def position(self) -> tuple:
         """
         The current position of the piece on the board in the form (x:int,y:int)
         """
@@ -47,9 +47,31 @@ class Piece(ABC):
         logging.debug(f"Failed to set the colour to {colour}")
 
     @abstractmethod
-    def get_legal_moves(self) -> list[tuple[int, int]]:
+    def get_legal_moves(self):
         pass
 
     @abstractmethod
     def make_move(self, move) -> None:
+        pass
+
+
+class Pawn(Piece):
+    """
+    Implementation of Piece class
+    """
+
+    # Don't like that you have to pass the game state numerous times
+    def __init__(self, position):
+        self.position = position
+
+    def get_legal_moves(self, game_state):
+        current_x = self.position[0]
+        current_y = self.position[1]
+        next_square = (current_x + 1, current_y)
+        if game_state.square_exists(next_square):
+            pass
+
+
+
+    def make_move(self, game_state, move) -> bool:
         pass

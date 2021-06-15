@@ -21,4 +21,13 @@ class GameState:
 
     Methods:
         GameState(starting_position : string) (constructor)
+        square_exists(position: tuple(x,y))
     """
+
+    def square_exists(self, position: tuple):
+        # Placeholder until I implement properly
+        if position[0] >= 8:
+            return False
+        elif position[1] < 0:
+            return False
+
