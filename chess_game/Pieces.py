@@ -26,6 +26,9 @@ class Piece(ABC):
 
     @position.setter
     def position_setter(self, position) -> None:
+        """
+        sets the position of a piece
+        """
         if type(position) == tuple:
             if len(position) == 2:
                 if type(position[0]) == int and type(position[1]) == int:
@@ -50,7 +53,6 @@ class Piece(ABC):
     def get_legal_moves(self):
         pass
 
-    @abstractmethod
     def make_move(self, move) -> None:
         pass
 
@@ -68,10 +70,7 @@ class Pawn(Piece):
         current_x = self.position[0]
         current_y = self.position[1]
         next_square = (current_x + 1, current_y)
-        if game_state.square_exists(next_square):
+        if game_state.square_exists(next_square) and game_state.square_is_empty(next_square):
             pass
 
 
-
-    def make_move(self, game_state, move) -> bool:
-        pass

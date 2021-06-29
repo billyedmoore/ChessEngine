@@ -1,0 +1,57 @@
+class Square:
+    """
+    A class to represent one square on a chess board
+
+    Properties:
+        position - position of the square on the board form (x:int, y:int) (no setter)
+    Methods:
+        Square(position : tuple(int, int))
+        pop_piece() - returns the piece located on the square and set current piece to None
+        set_piece(piece : Piece) - sets the current piece to the piece passed in
+    """
+    _position = None
+    _piece = None
+
+    def __init__(self, position):
+        self.position = position
+
+    @property
+    def position(self):
+        """
+        The position of the square of the board denoted by a tuple : (x :int,y :int)
+        """
+        return self._position
+
+    @position.setter
+    def position(self, position, game):
+        if game.square_exists(position) and game.square_is_empty(position):
+            self._position = position
+        else:
+            raise Exception("Invalid board position.")
+
+    def pop_piece(self):
+        """
+        Return the current piece and set the current piece value to None
+        Ensures that only one version of the piece exists
+        """
+        p = self._piece
+        self._piece = None
+        return p
+
+    def get_piece(self):
+        """
+        Returns the current piece without setting the piece attribute to None
+        Essentially makes a copy of the Piece
+        """
+        return self._piece
+
+    def set_piece(self, piece):
+        """
+        Sets the current piece, this will only work when the piece is currently null
+        """
+        if not self._piece:
+            self._piece == piece
+        else:
+            raise Exception("Pop or Remove piece before setting a new one.")
+
+

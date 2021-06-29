@@ -22,12 +22,19 @@ class GameState:
     Methods:
         GameState(starting_position : string) (constructor)
         square_exists(position: tuple(x,y))
+        square_is_empty(position: tuple(x,y))
     """
 
     def square_exists(self, position: tuple):
+        """
+        Checks if a square (denoted by some coords) exists
+        """
+
         # Placeholder until I implement properly
         if position[0] >= 8:
             return False
         elif position[1] < 0:
             return False
 
+    def square_is_empty(self, position: tuple):
+        return True
