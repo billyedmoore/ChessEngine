@@ -8,12 +8,13 @@ class Square:
         Square(position : tuple(int, int))
         pop_piece() - returns the piece located on the square and set current piece to None
         set_piece(piece : Piece) - sets the current piece to the piece passed in
+        is_empty() - returns True when _piece = None
     """
     _position = None
     _piece = None
 
     def __init__(self, position):
-        self.position = position
+        self._position = position
 
     @property
     def position(self):
@@ -23,11 +24,12 @@ class Square:
         return self._position
 
     @position.setter
-    def position(self, position, game):
-        if game.square_exists(position) and game.square_is_empty(position):
-            self._position = position
+    def position_setter(self, pos, game):
+        if game.square_exists(pos) and game.square_is_empty(position):
+            self._position = pos
         else:
             raise Exception("Invalid board position.")
+            # TODO: make a relevant exception so it can be caught without catching all errors
 
     def pop_piece(self):
         """
@@ -53,5 +55,8 @@ class Square:
             self._piece == piece
         else:
             raise Exception("Pop or Remove piece before setting a new one.")
+            # TODO: make a relevant exception so it can be caught without catching all errors
 
+    def is_empty(self):
+        return not bool(self._piece)
 
