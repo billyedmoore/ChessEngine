@@ -14,6 +14,7 @@ class GameState:
         square_is_empty(position: tuple(x,y))
     """
     _squares = []
+    _moves = []
 
     # _squares = [Square(0,0),Square(0,1),...,Square(1,0),Square(1,1),...,Square(2,0)]
 
@@ -23,8 +24,7 @@ class GameState:
     def _load_fen(self, fen_string):
         """
         load the pieces on the board from a FEN string (https://www.chessprogramming.org/Forsyth-Edwards_Notation).
-        Should only be called internally as should only be set by the constructor
-
+        Should only be called by the constructor
 
         Parameters:
             fen_string: a string that follows FEN notation (https://www.chessprogramming.org/Forsyth-Edwards_Notation)
@@ -35,8 +35,8 @@ class GameState:
 
         for rank_index in range(len(ranks)):
             squares = []
-            skip_counter = 0 # the number of empty squares before the next full one
-            chars_evaluated = 0 # the number of chars of the rank that have already been acted upon
+            skip_counter = 0  # the number of empty squares before the next full one
+            chars_evaluated = 0  # the number of chars of the rank that have already been acted upon
             for x in range(8):  # for each row of the chessboard
                 squares.append(Square((x, rank_index)))
                 if skip_counter != 0:
@@ -53,14 +53,15 @@ class GameState:
                     else:
                         color = "w"
 
-                    squares[x].set_piece(letter_lookup[ranks[rank_index][chars_evaluated].lower()](squares[x].position, color))
+                    squares[x].set_piece(
+                        letter_lookup[ranks[rank_index][chars_evaluated].lower()](squares[x].position, color))
                     chars_evaluated += 1
 
-            self._squares.extend(squares)
+            self._squares.extend(squares)  # overwrites the current squares
 
     def print(self):
         """
-        prints the board to the terminal **NOT** intended for use in final project
+        prints the board to the terminal **NOT** intended for use in final product
         """
 
         current_row = 0
@@ -76,8 +77,19 @@ class GameState:
                 output_string += f"{self._squares[square].get_piece().letter} "
         print(output_string)
 
-    def make_move(self, move):
+    def generate_fen(self):
+        """
+        Generate fen of the current position
+        intended for use in debugging more than the actual game
+        """
         pass
+    def make_move(self, move):
+        # TODO: Check that the move is valid
+        square_from = self._squares[move.position_from[0] + (move.position_from[1] * 8)]
+        piece = square_from.pop_piece()
+        pos_to = move.position_to
+        # TODO: Check that square is empty
+        self._squares[pos_to[0] + (pos_to[1] * 8)].set_piece(piece)
 
     def square_exists(self, position: tuple):
         """
@@ -91,3 +103,35 @@ class GameState:
 
     def square_is_empty(self, position: tuple):
         return True
+
+
+class MoveStack:
+    """
+    Dynamic length stack to store the moves made in a game
+    Basically a glorified property
+    """
+    _moves = []
+
+    def __init__(self):
+        pass
+
+    def push(self, move):
+        """
+        Adds a move to the top of the move stack
+        """
+        self._moves.append(move)
+
+    def pop(self):
+        """
+        Returns and removes the top item from the stack
+        """
+        length = len(self._moves)
+        value = self._moves[length - 1]
+        del self._moves[length - 1]
+        return value
+
+    def peek(self):
+        """
+        Returns the top item from the stack without removing it from the stack
+        """
+        return self._moves[len(self._moves)-1]

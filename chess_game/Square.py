@@ -24,8 +24,8 @@ class Square:
         return self._position
 
     @position.setter
-    def position_setter(self, pos, game):
-        if game.square_exists(pos) and game.square_is_empty(position):
+    def position(self, pos,game):
+        if game.square_exists(pos) and game.square_is_empty(pos):
             self._position = pos
         else:
             raise Exception("Invalid board position.")
@@ -53,8 +53,9 @@ class Square:
         """
         if not self._piece:
             self._piece = piece
+            self._piece.position = self.position
         else:
-            raise Exception("Pop or Remove piece before setting a new one.")
+            raise Exception(f"Pop or Remove piece before setting a new one.")
             # TODO: make a relevant exception so it can be caught without catching all errors
 
     def is_empty(self):

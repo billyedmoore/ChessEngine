@@ -12,8 +12,8 @@ class Move:
     _position_to = (-1, -1)
 
     def __init__(self, from_pos, to_pos):
-        position_from = from_pos
-        position_to = to_pos
+        self._position_from = from_pos
+        self._position_to = to_pos
 
     def is_valid_position(self, position: tuple):
         for i in position:

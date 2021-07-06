@@ -23,7 +23,7 @@ class Piece:
             return self._letter.lower()
         if self.colour.lower() == "b":
             return self._letter.upper()
-        # TODO raise exception if color isn't a valid value
+        # TODO raise exception if color isn't in the set {"w","b"}
 
     @property
     def position(self) -> tuple:
@@ -33,7 +33,7 @@ class Piece:
         return self._position
 
     @position.setter
-    def position_setter(self, position) -> None:
+    def position(self, position) -> None:
         """
         sets the position of the piece
         """
