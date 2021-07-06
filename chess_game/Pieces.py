@@ -1,7 +1,4 @@
-from abc import ABC, abstractmethod, abstractclassmethod
-
-
-class Piece(ABC):
+class Piece:
     """
     Abstract class to be implemented by the individual piece type
 
@@ -14,7 +11,19 @@ class Piece(ABC):
     _colour = None
     _position = (None, None)
     _moved = False
-    letter = "F"
+    _letter = "F"
+
+    def __init__(self, position, color):
+        self._position = position
+        self._colour = color
+
+    @property
+    def letter(self) -> str:
+        if self.colour.lower() == "w":
+            return self._letter.lower()
+        if self.colour.lower() == "b":
+            return self._letter.upper()
+        # TODO raise exception if color isn't a valid value
 
     @property
     def position(self) -> tuple:
@@ -41,16 +50,19 @@ class Piece(ABC):
         Representation of the color of the piece "B" for black pieces and "W"
         for white pieces
         """
-        return self._position
+        return self._colour
 
     @colour.setter
     def colour_setter(self, colour) -> None:
         if colour.upper() in ["B", "W"]:
-            self._colour = colour
+            self._colour = colour.upper()
 
-    @abstractmethod
     def get_legal_moves(self):
         pass
+
+    @colour.setter
+    def colour(self, value):
+        self._colour = value
 
 
 class Pawn(Piece):
@@ -58,11 +70,11 @@ class Pawn(Piece):
     Implementation of Piece class
     """
 
-    letter = "P"
+    _letter = "P"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position):
-        self.position = position
+    def __init__(self, position, color):
+        super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
         return None
@@ -73,11 +85,11 @@ class Bishop(Piece):
     Implementation of Piece class
     """
 
-    letter = "B"
+    _letter = "B"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position):
-        self.position = position
+    def __init__(self, position, color):
+        super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
         return None
@@ -88,11 +100,11 @@ class Queen(Piece):
     Implementation of Piece class
     """
 
-    letter = "Q"
+    _letter = "Q"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position):
-        self.position = position
+    def __init__(self, position, color):
+        super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
         return None
@@ -103,11 +115,11 @@ class King(Piece):
     Implementation of Piece class
     """
 
-    letter = "K"
+    _letter = "K"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position):
-        self.position = position
+    def __init__(self, position, color):
+        super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
         return None
@@ -118,11 +130,11 @@ class Rook(Piece):
     Implementation of Piece class
     """
 
-    letter = "R"
+    _letter = "R"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position):
-        self.position = position
+    def __init__(self, position, color):
+        super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
         return None
@@ -133,11 +145,11 @@ class Knight(Piece):
     Implementation of Piece class
     """
 
-    letter = "N"
+    _letter = "N"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position):
-        self.position = position
+    def __init__(self, position, color):
+        super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
         return None

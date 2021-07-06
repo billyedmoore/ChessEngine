@@ -52,7 +52,7 @@ class Square:
         Sets the current piece, this will only work when the piece is currently null
         """
         if not self._piece:
-            self._piece == piece
+            self._piece = piece
         else:
             raise Exception("Pop or Remove piece before setting a new one.")
             # TODO: make a relevant exception so it can be caught without catching all errors

@@ -1,4 +1,5 @@
 from .Square import Square
+from .Pieces import *
 
 
 class GameState:
@@ -7,6 +8,7 @@ class GameState:
 
     Methods:
         GameState(starting_position : string) (constructor)
+        _load_fen(fen_string: string)
         make_move(move: Move)
         square_exists(position: tuple(x,y))
         square_is_empty(position: tuple(x,y))
@@ -15,31 +17,63 @@ class GameState:
 
     # _squares = [Square(0,0),Square(0,1),...,Square(1,0),Square(1,1),...,Square(2,0)]
 
-    def __init__(self,fen_string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
+    def __init__(self, fen_string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
+        self._load_fen(fen_string)
 
-        ## To be replaced
+    def _load_fen(self, fen_string):
+        """
+        load the pieces on the board from a FEN string (https://www.chessprogramming.org/Forsyth-Edwards_Notation).
+        Should only be called internally as should only be set by the constructor
 
-        for x in range(8):
-            for y in range(8):
-                self._squares.append(Square((x,y)))
+
+        Parameters:
+            fen_string: a string that follows FEN notation (https://www.chessprogramming.org/Forsyth-Edwards_Notation)
+        """
+        letter_lookup = {"r": Rook, "n": Knight, "p": Pawn, "b": Bishop, "k": King, "q": Queen}
+
+        ranks = fen_string.split(" ")[0].split("/")
+
+        for rank_index in range(len(ranks)):
+            squares = []
+            skip_counter = 0 # the number of empty squares before the next full one
+            chars_evaluated = 0 # the number of chars of the rank that have already been acted upon
+            for x in range(8):  # for each row of the chessboard
+                squares.append(Square((x, rank_index)))
+                if skip_counter != 0:
+                    skip_counter = skip_counter - 1
+                    continue
+                elif (ranks[rank_index][chars_evaluated]).isnumeric():
+                    skip_counter += int(ranks[rank_index][chars_evaluated]) - 1
+                    chars_evaluated += 1
+                    continue
+                else:
+                    # in accordance with FEN notation white pieces are capitalised
+                    if ranks[rank_index][chars_evaluated].islower():
+                        color = "b"
+                    else:
+                        color = "w"
+
+                    squares[x].set_piece(letter_lookup[ranks[rank_index][chars_evaluated].lower()](squares[x].position, color))
+                    chars_evaluated += 1
+
+            self._squares.extend(squares)
 
     def print(self):
         """
-        prints the board to the terminal
+        prints the board to the terminal **NOT** intended for use in final project
         """
 
-        output_string = ""
         current_row = 0
+        output_string = f"{' ' * 3} A B C D E F G H\n{' ' * 4}{'_ ' * 8}\n{current_row + 1} | "
         for square in range(len(self._squares)):
             if square // 8 != current_row:
-                output_string += "\n"
                 current_row = square // 8
+                output_string += f"\n{current_row + 1} | "
             empty = self._squares[square].is_empty()
             if empty:
                 output_string += " "
             else:
-                output_string += self._squares[square].get_piece().letter
-
+                output_string += f"{self._squares[square].get_piece().letter} "
         print(output_string)
 
     def make_move(self, move):
