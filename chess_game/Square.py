@@ -24,7 +24,7 @@ class Square:
         return self._position
 
     @position.setter
-    def position(self, pos,game):
+    def position(self, pos, game):
         if game.square_exists(pos) and game.square_is_empty(pos):
             self._position = pos
         else:
@@ -60,4 +60,3 @@ class Square:
 
     def is_empty(self):
         return not bool(self._piece)
-

@@ -1,6 +1,9 @@
 from .Square import Square
 from .Pieces import *
 
+# TODO: implement get_legal_moves methods so they return legal moves as Move
+#       objects
+
 
 class GameState:
     """
@@ -29,7 +32,8 @@ class GameState:
         Parameters:
             fen_string: a string that follows FEN notation (https://www.chessprogramming.org/Forsyth-Edwards_Notation)
         """
-        letter_lookup = {"r": Rook, "n": Knight, "p": Pawn, "b": Bishop, "k": King, "q": Queen}
+        letter_lookup = {"r": Rook, "n": Knight,
+                         "p": Pawn, "b": Bishop, "k": King, "q": Queen}
 
         ranks = fen_string.split(" ")[0].split("/")
 
@@ -83,13 +87,22 @@ class GameState:
         intended for use in debugging more than the actual game
         """
         pass
+
     def make_move(self, move):
-        # TODO: Check that the move is valid
-        square_from = self._squares[move.position_from[0] + (move.position_from[1] * 8)]
+        """
+        Play a move on the GameState
+        """
+        square_from = self._squares[move.position_from[0] +
+                                    (move.position_from[1] * 8)]
         piece = square_from.pop_piece()
-        pos_to = move.position_to
-        # TODO: Check that square is empty
-        self._squares[pos_to[0] + (pos_to[1] * 8)].set_piece(piece)
+        square_to = self._squares[move.postion_to[0] +
+                                  (move.postion_to[1] * 8)]
+
+        if (square_from.position, square_to.position) not in
+        piece.get_legal_moves(self) or not square_to.is_empty():
+            raise Exception("Invalid Move")
+
+        square_to.set_piece(piece)
 
     def square_exists(self, position: tuple):
         """
@@ -102,7 +115,7 @@ class GameState:
             return False
 
     def square_is_empty(self, position: tuple):
-        return True
+        square_index = position[1]*8+position[0]
 
 
 class MoveStack:
