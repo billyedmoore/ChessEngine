@@ -1,6 +1,5 @@
 from .Square import Square
-from .Pieces import *
-
+from .Pieces import Rook, Pawn, Bishop, King, Knight, Queen
 # TODO: implement get_legal_moves methods so they return legal moves as Move
 #       objects
 
@@ -95,11 +94,10 @@ class GameState:
         square_from = self._squares[move.position_from[0] +
                                     (move.position_from[1] * 8)]
         piece = square_from.pop_piece()
-        square_to = self._squares[move.postion_to[0] +
-                                  (move.postion_to[1] * 8)]
-
-        if (square_from.position, square_to.position) not in
-        piece.get_legal_moves(self) or not square_to.is_empty():
+        square_to = self._squares[move.position_to[0] +
+                                  (move.position_to[1] * 8)]
+        formated_moves = [(m.position_from,m.position_to) for m in piece.get_legal_moves(self)]
+        if (square_from.position, square_to.position) not in formated_moves or not square_to.is_empty():
             raise Exception("Invalid Move")
 
         square_to.set_piece(piece)
@@ -115,7 +113,8 @@ class GameState:
             return False
 
     def square_is_empty(self, position: tuple):
-        square_index = position[1]*8+position[0]
+        square_index = position[1] * 8 + position[0]
+        return not bool(self._squares[square_index]._piece)
 
 
 class MoveStack:
@@ -147,4 +146,4 @@ class MoveStack:
         """
         Returns the top item from the stack without removing it from the stack
         """
-        return self._moves[len(self._moves)-1]
+        return self._moves[len(self._moves) - 1]

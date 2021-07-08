@@ -1,3 +1,6 @@
+from .Move import Move
+
+
 class Piece:
     """
     Abstract class to be implemented by the individual piece type
@@ -57,7 +60,7 @@ class Piece:
         if colour.upper() in ["B", "W"]:
             self._colour = colour.upper()
 
-    def get_legal_moves(self):
+    def get_legal_moves(self,game_state):
         pass
 
     @colour.setter
@@ -77,7 +80,19 @@ class Pawn(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return None
+        # TODO: implement promotion
+        legal_moves = []
+        if self.position[1] != 7:
+            if game_state.square_is_empty((self.position[0], self.position[1] + 1)):
+                legal_moves.append(Move(self.position, (self.position[0], self.position[1] + 1)))
+                print(self.position)
+        if self.position[1] == 1:
+            if game_state.square_is_empty((self.position[0], self.position[1] + 2)):
+                legal_moves.append(Move(self.position, (self.position[0], self.position[1] + 2)))
+
+        print(legal_moves)
+        return legal_moves
+
 
 
 class Bishop(Piece):
@@ -92,7 +107,24 @@ class Bishop(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return None
+        legal_moves = []
+        directions = [(1,-1),(1,1),(-1,1),(-1,-1)]
+
+        for dir in directions:
+            for i in range(8):
+                pos = (self.position[0]+(i*dir[0]),self.position+(i*dir[1]))
+                if game_state.square_exists(pos):
+                    if game_state.square_is_empty(pos):
+                        legal_moves.append(Move(self.position,pos))
+                    else:
+                        break
+
+
+
+
+
+
+
 
 
 class Queen(Piece):
@@ -107,7 +139,7 @@ class Queen(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return None
+        return []
 
 
 class King(Piece):
@@ -122,7 +154,7 @@ class King(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return None
+        return []
 
 
 class Rook(Piece):
@@ -137,7 +169,7 @@ class Rook(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return None
+        return []
 
 
 class Knight(Piece):
@@ -152,4 +184,4 @@ class Knight(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return None
+        return []
