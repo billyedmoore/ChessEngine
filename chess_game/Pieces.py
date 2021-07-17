@@ -44,7 +44,6 @@ class Piece:
             if len(position) == 2:
                 if type(position[0]) == int and type(position[1]) == int:
                     self._position = position
-
     # TODO: raise an exception if the position isn't valid
 
     @property
@@ -62,6 +61,30 @@ class Piece:
 
     def get_legal_moves(self, game_state):
         pass
+
+    def get_diagonal_moves(self, game_state, max_range=8):
+        """
+        Returns a list of diagonal moves without jumping pieces
+        To be used by Queen, King and Bishop.
+
+        Parameters:
+            GameState game_state - the current board position
+            int max_range - the distance from the current position the pieces 
+                            can go (allows for the King to move only 1)
+        """
+        diag_moves = []
+        directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
+
+        for direction in directions:
+            for i in range(1, max_range):
+                pos = (self.position[0]+(i*direction[0]),
+                       self.position[1]+(i*direction[1]))
+                if game_state.square_exists(pos):
+                    if game_state.square_is_empty(pos):
+                        diag_moves.append(Move(self.position, pos))
+                    else:
+                        break
+        return diag_moves
 
     @colour.setter
     def colour(self, value):
@@ -106,18 +129,7 @@ class Bishop(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        legal_moves = []
-        directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
-
-        for direction in directions:
-            for i in range(1, 8):
-                pos = (self.position[0]+(i*direction[0]),
-                       self.position[1]+(i*direction[1]))
-                if game_state.square_exists(pos):
-                    if game_state.square_is_empty(pos):
-                        legal_moves.append(Move(self.position, pos))
-                    else:
-                        break
+        legal_moves = self.get_diagonal_moves(game_state)
         return legal_moves
 
 
