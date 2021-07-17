@@ -60,7 +60,7 @@ class Piece:
         if colour.upper() in ["B", "W"]:
             self._colour = colour.upper()
 
-    def get_legal_moves(self,game_state):
+    def get_legal_moves(self, game_state):
         pass
 
     @colour.setter
@@ -84,15 +84,14 @@ class Pawn(Piece):
         legal_moves = []
         if self.position[1] != 7:
             if game_state.square_is_empty((self.position[0], self.position[1] + 1)):
-                legal_moves.append(Move(self.position, (self.position[0], self.position[1] + 1)))
-                print(self.position)
+                legal_moves.append(
+                    Move(self.position, (self.position[0], self.position[1] + 1)))
         if self.position[1] == 1:
             if game_state.square_is_empty((self.position[0], self.position[1] + 2)):
-                legal_moves.append(Move(self.position, (self.position[0], self.position[1] + 2)))
+                legal_moves.append(
+                    Move(self.position, (self.position[0], self.position[1] + 2)))
 
-        print(legal_moves)
         return legal_moves
-
 
 
 class Bishop(Piece):
@@ -108,23 +107,18 @@ class Bishop(Piece):
 
     def get_legal_moves(self, game_state):
         legal_moves = []
-        directions = [(1,-1),(1,1),(-1,1),(-1,-1)]
+        directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
 
-        for dir in directions:
-            for i in range(8):
-                pos = (self.position[0]+(i*dir[0]),self.position+(i*dir[1]))
+        for direction in directions:
+            for i in range(1, 8):
+                pos = (self.position[0]+(i*direction[0]),
+                       self.position[1]+(i*direction[1]))
                 if game_state.square_exists(pos):
                     if game_state.square_is_empty(pos):
-                        legal_moves.append(Move(self.position,pos))
+                        legal_moves.append(Move(self.position, pos))
                     else:
                         break
-
-
-
-
-
-
-
+        return legal_moves
 
 
 class Queen(Piece):

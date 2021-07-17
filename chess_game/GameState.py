@@ -75,7 +75,7 @@ class GameState:
                 output_string += f"\n{current_row + 1} | "
             empty = self._squares[square].is_empty()
             if empty:
-                output_string += " "
+                output_string += "  "
             else:
                 output_string += f"{self._squares[square].get_piece().letter} "
         print(output_string)
@@ -93,27 +93,29 @@ class GameState:
         """
         square_from = self._squares[move.position_from[0] +
                                     (move.position_from[1] * 8)]
-        piece = square_from.pop_piece()
+        piece = square_from.get_piece()
         square_to = self._squares[move.position_to[0] +
                                   (move.position_to[1] * 8)]
-        formated_moves = [(m.position_from,m.position_to) for m in piece.get_legal_moves(self)]
+        formated_moves = [(m.position_from, m.position_to)
+                          for m in piece.get_legal_moves(self)]
+        print(formated_moves)
         if (square_from.position, square_to.position) not in formated_moves or not square_to.is_empty():
-            raise Exception("Invalid Move")
-
+            raise Exception(
+                f"Invalid Move {(square_from.position,square_to.position)}")
+        square_from.pop_piece()
         square_to.set_piece(piece)
 
     def square_exists(self, position: tuple):
         """
         Checks if a square (denoted by some coords) exists
         """
-        # Placeholder until I implement properly
-        if position[0] >= 8:
-            return False
-        elif position[1] < 0:
-            return False
+        def pos_in_range(pos):
+            return(pos < 8 and pos >= 0)
+
+        return(pos_in_range(position[0]) and pos_in_range(position[1]))
 
     def square_is_empty(self, position: tuple):
-        square_index = position[1] * 8 + position[0]
+        square_index = position[1]*8 + position[0]
         return not bool(self._squares[square_index]._piece)
 
 
