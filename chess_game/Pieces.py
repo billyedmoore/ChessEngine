@@ -62,18 +62,19 @@ class Piece:
     def get_legal_moves(self, game_state):
         pass
 
-    def get_diagonal_moves(self, game_state, max_range=8):
+    def _get_possible_moves(self, game_state, directions, max_range=8):
         """
-        Returns a list of diagonal moves without jumping pieces
+        Returns a list of moves without jumping pieces in given directions.
         To be used by Queen, King and Bishop.
 
         Parameters:
             GameState game_state - the current board position
+            list<tuple<int,int>> directions - a list of directions denoted by 
+                                              tuples of int between -1 and 1
             int max_range - the distance from the current position the pieces 
                             can go (allows for the King to move only 1)
         """
         diag_moves = []
-        directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
 
         for direction in directions:
             for i in range(1, max_range):
@@ -129,7 +130,8 @@ class Bishop(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        legal_moves = self.get_diagonal_moves(game_state)
+        directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
+        legal_moves = self._get_possible_moves(game_state, directions)
         return legal_moves
 
 
