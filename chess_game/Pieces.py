@@ -147,7 +147,10 @@ class Queen(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return []
+        directions = [(1, -1), (1, 0), (1, 1), (0, -1),
+                      (0, 1), (-1, 1), (-1, -1), (-1, 0)]
+        legal_moves = self._get_possible_moves(game_state, directions)
+        return legal_moves
 
 
 class King(Piece):
@@ -162,7 +165,11 @@ class King(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return []
+        directions = [(1, -1), (1, 0), (1, 1), (0, -1),
+                      (0, 1), (-1, 1), (-1, -1), (-1, 0)]
+        legal_moves = self._get_possible_moves(
+            game_state, directions, max_range=2)
+        return legal_moves
 
 
 class Rook(Piece):
