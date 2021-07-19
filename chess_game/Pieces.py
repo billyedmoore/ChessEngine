@@ -69,9 +69,9 @@ class Piece:
 
         Parameters:
             GameState game_state - the current board position
-            list<tuple<int,int>> directions - a list of directions denoted by 
+            list<tuple<int,int>> directions - a list of directions denoted by
                                               tuples of int between -1 and 1
-            int max_range - the distance from the current position the pieces 
+            int max_range - the distance from the current position the pieces
                             can go (allows for the King to move only 1)
         """
         diag_moves = []
@@ -184,7 +184,10 @@ class Rook(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return []
+        directions = [(0, -1), (0, 1)]
+        legal_moves = self._get_possible_moves(
+            game_state, directions)
+        return legal_moves
 
 
 class Knight(Piece):
@@ -199,4 +202,17 @@ class Knight(Piece):
         super().__init__(position, color)
 
     def get_legal_moves(self, game_state):
-        return []
+        legal_moves = []
+
+        # Chose not to generate these programatically as would only slow down
+        # the program and serve no real purpose other than showing off
+        possible_changes = [(-2, -1), (-2, +1), (+2, -1),
+                            (+2, +1), (-1, -2), (-1, +2), (+1, -2), (+1, +2)]
+
+        for change in possible_changes:
+            possible_move_to = (
+                self.position[0]+change[0], self.position[1]+change[1])
+            if game_state.square_exists(possible_move_to) and game_state.square_is_empty(possible_move_to):
+                legal_moves.append(Move(self.position, possible_move_to))
+
+        return legal_moves
