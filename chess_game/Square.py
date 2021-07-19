@@ -37,6 +37,7 @@ class Square:
         Ensures that only one version of the piece exists
         """
         p = self._piece
+        p.position = (None, None)
         self._piece = None
         return p
 

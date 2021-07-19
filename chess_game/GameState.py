@@ -1,7 +1,38 @@
 from .Square import Square
 from .Pieces import Rook, Pawn, Bishop, King, Knight, Queen
-# TODO: implement get_legal_moves methods so they return legal moves as Move
-#       objects
+
+
+class MoveStack:
+    """
+    Dynamic length stack to store the moves made in a game
+    Basically a glorified property
+    """
+    _moves = []
+
+    @property
+    def ply_count(self):
+        return len(self._moves)
+
+    def push(self, move):
+        """
+        Adds a move to the top of the move stack
+        """
+        self._moves.append(move)
+
+    def pop(self):
+        """
+        Returns and removes the top item from the stack
+        """
+        length = len(self._moves)
+        value = self._moves[length - 1]
+        del self._moves[length - 1]
+        return value
+
+    def peek(self):
+        """
+        Returns the top item from the stack without removing it from the stack
+        """
+        return self._moves[len(self._moves) - 1]
 
 
 class GameState:
@@ -16,12 +47,17 @@ class GameState:
         square_is_empty(position: tuple(x,y))
     """
     _squares = []
-    _moves = []
+    _captured_pieces = []
+    _moves = MoveStack()
 
     # _squares = [Square(0,0),Square(0,1),...,Square(1,0),Square(1,1),...,Square(2,0)]
 
     def __init__(self, fen_string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
         self._load_fen(fen_string)
+
+    @property
+    def ply_count(self):
+        return self._moves.ply_count
 
     def _load_fen(self, fen_string):
         """
@@ -103,7 +139,11 @@ class GameState:
             raise Exception(
                 f"Invalid Move {(square_from.position,square_to.position)}")
         square_from.pop_piece()
+        if not self.square_is_empty(square_to.position):
+            captured_piece = square_to.pop_piece()
+            self.captured_pieces.append(captured_piece)
         square_to.set_piece(piece)
+        self._moves.push(move)
 
     def square_exists(self, position: tuple):
         """
@@ -117,35 +157,3 @@ class GameState:
     def square_is_empty(self, position: tuple):
         square_index = position[1]*8 + position[0]
         return not bool(self._squares[square_index]._piece)
-
-
-class MoveStack:
-    """
-    Dynamic length stack to store the moves made in a game
-    Basically a glorified property
-    """
-    _moves = []
-
-    def __init__(self):
-        pass
-
-    def push(self, move):
-        """
-        Adds a move to the top of the move stack
-        """
-        self._moves.append(move)
-
-    def pop(self):
-        """
-        Returns and removes the top item from the stack
-        """
-        length = len(self._moves)
-        value = self._moves[length - 1]
-        del self._moves[length - 1]
-        return value
-
-    def peek(self):
-        """
-        Returns the top item from the stack without removing it from the stack
-        """
-        return self._moves[len(self._moves) - 1]

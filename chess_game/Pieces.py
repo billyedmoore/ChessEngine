@@ -96,7 +96,7 @@ class Pawn(Piece):
     """
     Implementation of Piece class
     """
-
+    _en_passant_next_turn = False
     _letter = "P"
 
     # Don't like that you have to pass the game state numerous times
@@ -106,6 +106,7 @@ class Pawn(Piece):
     def get_legal_moves(self, game_state):
         # TODO: implement promotion
         legal_moves = []
+
         if self.position[1] != 7:
             if game_state.square_is_empty((self.position[0], self.position[1] + 1)):
                 legal_moves.append(
