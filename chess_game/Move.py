@@ -10,8 +10,12 @@ class Move:
 
     _position_from = (-1, -1)
     _position_to = (-1, -1)
+    _promotion = False
+    _promote_to = None
 
-    def __init__(self, from_pos, to_pos):
+    def __init__(self, from_pos, to_pos, promotion=False, promote_to=None):
+        self._promotion = promotion
+        self._promote_to = promote_to
         self._position_from = from_pos
         self._position_to = to_pos
 
@@ -21,6 +25,14 @@ class Move:
                 return False
             if i in range(0, 8):
                 return True
+
+    @property
+    def promotion(self):
+        return self._promotion
+
+    @property
+    def promote_to(self):
+        return self._promote_to
 
     @property
     def position_from(self):

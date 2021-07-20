@@ -131,15 +131,17 @@ class GameState:
 
         piece = square_from.get_piece()  # only a copy as the move may be invalid
         square_to = self.get_square(move.position_to)
-        formated_moves = [(m.position_from, m.position_to)
+        formated_moves = [(m.position_from, m.position_to, m.promotion)
                           for m in piece.get_legal_moves(self)]
         print(formated_moves)
-        if (square_from.position, square_to.position) not in formated_moves or not square_to.is_empty():
+        if (square_from.position, square_to.position, move.promotion) not in formated_moves:
             raise Exception(
                 f"Invalid Move {(square_from.position,square_to.position)}")
 
         # now the move is valid remove piece from square_from
         square_from.pop_piece()
+        if move.promotion:
+            square_from.set_piece(move.promote_to)
 
         if not self.square_is_empty(square_to.position):
             captured_piece = square_to.pop_piece()

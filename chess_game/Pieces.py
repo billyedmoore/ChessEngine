@@ -113,11 +113,14 @@ class Pawn(Piece):
         # TODO: implement promotion
         legal_moves = []
 
-        rows = {"b": (1, 7), "w": (6, 0)}
+        rows = {"b": (6, 0), "w": (1, 7)}
         if self.position[1] != rows[self.colour.lower()][1]:
             if game_state.square_is_empty((self.position[0], self.position[1] + 1)):
                 legal_moves.append(
                     Move(self.position, (self.position[0], self.position[1] + 1)))
+        else:
+            legal_moves.append(
+                Move(self.position, self.position, promotion=True))
 
         # en-passant
         # allows you to capture horizontaly after moving 2 squares on the start
@@ -131,6 +134,7 @@ class Pawn(Piece):
                         legal_moves.append(Move(self.position, move))
 
         elif self.position[1] == rows[self.colour.lower()][0]:
+            print("got ere")
             if game_state.square_exists((self.position[0], self.position[1] + 2)):
                 legal_moves.append(
                     Move(self.position, (self.position[0], self.position[1] + 2)))
