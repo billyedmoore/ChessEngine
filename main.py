@@ -3,6 +3,8 @@ from chess_game.Move import Move
 from chess_game.GameState import GameState
 
 g = GameState()
+p = g.get_square((3, 1)).get_piece()
+print(p._move_count)
 # print(g._squares[13]._piece.get_legal_moves(g))
 g.print()
 m = Move((3, 1), (3, 3))
@@ -17,3 +19,4 @@ g.print()
 m_four = Move((4, 0), (3, 0))
 g.make_move(m_four)
 g.print()
+print(p._move_count)

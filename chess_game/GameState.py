@@ -127,23 +127,30 @@ class GameState:
         """
         Play a move on the GameState
         """
-        square_from = self._squares[move.position_from[0] +
-                                    (move.position_from[1] * 8)]
-        piece = square_from.get_piece()
-        square_to = self._squares[move.position_to[0] +
-                                  (move.position_to[1] * 8)]
+        square_from = self.get_square(move.position_from)
+
+        piece = square_from.get_piece()  # only a copy as the move may be invalid
+        square_to = self.get_square(move.position_to)
         formated_moves = [(m.position_from, m.position_to)
                           for m in piece.get_legal_moves(self)]
         print(formated_moves)
         if (square_from.position, square_to.position) not in formated_moves or not square_to.is_empty():
             raise Exception(
                 f"Invalid Move {(square_from.position,square_to.position)}")
+
+        # now the move is valid remove piece from square_from
         square_from.pop_piece()
+
         if not self.square_is_empty(square_to.position):
             captured_piece = square_to.pop_piece()
-            self.captured_pieces.append(captured_piece)
+            self._captured_pieces.append(captured_piece)
+        piece.make_move(square_to.position)
         square_to.set_piece(piece)
         self._moves.push(move)
+
+    def get_square(self, position: tuple):
+        return(self._squares[position[0] +
+                             (position[1] * 8)])
 
     def square_exists(self, position: tuple):
         """

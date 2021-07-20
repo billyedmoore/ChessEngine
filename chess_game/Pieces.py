@@ -2,6 +2,7 @@ from .Move import Move
 
 
 class Piece:
+
     """
     Abstract class to be implemented by the individual piece type
 
@@ -14,6 +15,7 @@ class Piece:
     _colour = None
     _position = (None, None)
     _moved = False
+    _move_count = 0
     _letter = "F"
 
     def __init__(self, position, color):
@@ -59,6 +61,11 @@ class Piece:
         if colour.upper() in ["B", "W"]:
             self._colour = colour.upper()
 
+    def make_move(self, position_to):
+        self._moved = True
+        self.position = position_to
+        self._move_count += 1
+
     def get_legal_moves(self, game_state):
         pass
 
@@ -96,7 +103,6 @@ class Pawn(Piece):
     """
     Implementation of Piece class
     """
-    _en_passant_next_turn = False
     _letter = "P"
 
     # Don't like that you have to pass the game state numerous times
@@ -107,12 +113,25 @@ class Pawn(Piece):
         # TODO: implement promotion
         legal_moves = []
 
-        if self.position[1] != 7:
+        rows = {"b": (1, 7), "w": (6, 0)}
+        if self.position[1] != rows[self.colour.lower()][1]:
             if game_state.square_is_empty((self.position[0], self.position[1] + 1)):
                 legal_moves.append(
                     Move(self.position, (self.position[0], self.position[1] + 1)))
-        if self.position[1] == 1:
-            if game_state.square_is_empty((self.position[0], self.position[1] + 2)):
+
+        # en-passant
+        # allows you to capture horizontaly after moving 2 squares on the start
+        if self._move_count == 1 and self.position[1] == rows[self.colour.lower()][0]+2:
+            possible_moves = [(self.position[0], self.position[1] + 1),
+                              (self.position[0], self.position[1] - 1)]
+            for move in possible_moves:
+                if game_state.square_exists(move):
+                    # only if the square is full
+                    if not game_state.square_is_empty(move):
+                        legal_moves.append(Move(self.position, move))
+
+        elif self.position[1] == rows[self.colour.lower()][0]:
+            if game_state.square_exists((self.position[0], self.position[1] + 2)):
                 legal_moves.append(
                     Move(self.position, (self.position[0], self.position[1] + 2)))
 
