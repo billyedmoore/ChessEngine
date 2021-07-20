@@ -141,13 +141,14 @@ class GameState:
         # now the move is valid remove piece from square_from
         square_from.pop_piece()
         if move.promotion:
-            square_from.set_piece(move.promote_to)
-
-        if not self.square_is_empty(square_to.position):
-            captured_piece = square_to.pop_piece()
-            self._captured_pieces.append(captured_piece)
-        piece.make_move(square_to.position)
-        square_to.set_piece(piece)
+            square_from.set_piece(move.promote_to(
+                square_from.position, piece.colour, move_count=piece.move_count))
+        else:
+            if not self.square_is_empty(square_to.position):
+                captured_piece = square_to.pop_piece()
+                self._captured_pieces.append(captured_piece)
+            piece.make_move(square_to.position)
+            square_to.set_piece(piece)
         self._moves.push(move)
 
     def get_square(self, position: tuple):

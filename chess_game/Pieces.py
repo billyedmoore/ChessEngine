@@ -14,20 +14,24 @@ class Piece:
     """
     _colour = None
     _position = (None, None)
-    _moved = False
     _move_count = 0
     _letter = "F"
 
-    def __init__(self, position, color):
+    def __init__(self, position, color, move_count=0):
+        self._move_count = move_count
         self._position = position
         self._colour = color
 
     @property
+    def move_count(self) -> int:
+        return self._move_count
+
+    @property
     def letter(self) -> str:
         if self.colour.lower() == "w":
-            return self._letter.lower()
-        if self.colour.lower() == "b":
             return self._letter.upper()
+        if self.colour.lower() == "b":
+            return self._letter.lower()
         # TODO raise exception if color isn't in the set {"w","b"}
 
     @property
@@ -106,38 +110,41 @@ class Pawn(Piece):
     _letter = "P"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color):
-        super().__init__(position, color)
+    def __init__(self, position, color, move_count=0):
+        super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
         # TODO: implement promotion
         legal_moves = []
+        print(self.colour.upper())
 
-        rows = {"b": (6, 0), "w": (1, 7)}
-        if self.position[1] != rows[self.colour.lower()][1]:
-            if game_state.square_is_empty((self.position[0], self.position[1] + 1)):
-                legal_moves.append(
-                    Move(self.position, (self.position[0], self.position[1] + 1)))
+        colour_info = {
+            "B": {"start_row": 1, "end_row": 7, "direction": +1},
+            "W": {"start_row": 6, "end_row": 0, "direction": -1}}
+
+        info = colour_info[self.colour.upper()]
+        if self.position[1] == info["start_row"]:
+            move_to = (self.position[0], self.position[1] +
+                       (2*info["direction"]))
+            if game_state.square_exists(move_to):
+                legal_moves.append(Move(self.position, move_to))
+
+        if self.position[1] != info["end_row"]:
+            move_to = (self.position[0], self.position[1] +
+                       (info["direction"]))
+            if game_state.square_exists(move_to):
+                legal_moves.append(Move(self.position, move_to))
         else:
             legal_moves.append(
                 Move(self.position, self.position, promotion=True))
 
         # en-passant
-        # allows you to capture horizontaly after moving 2 squares on the start
-        if self._move_count == 1 and self.position[1] == rows[self.colour.lower()][0]+2:
-            possible_moves = [(self.position[0], self.position[1] + 1),
-                              (self.position[0], self.position[1] - 1)]
-            for move in possible_moves:
-                if game_state.square_exists(move):
-                    # only if the square is full
-                    if not game_state.square_is_empty(move):
-                        legal_moves.append(Move(self.position, move))
-
-        elif self.position[1] == rows[self.colour.lower()][0]:
-            print("got ere")
-            if game_state.square_exists((self.position[0], self.position[1] + 2)):
-                legal_moves.append(
-                    Move(self.position, (self.position[0], self.position[1] + 2)))
+        if self.position[1] == info["start_row"]+(2*info["direction"]):
+            directions = [+1, -1]
+            for direction in directions:
+                if not game_state.square_is_empty((self.position[0]+direction, self.position[1])):
+                    legal_moves.append(
+                        self.position, (self.position[0]+direction, self.position[1]))
 
         return legal_moves
 
@@ -150,8 +157,8 @@ class Bishop(Piece):
     _letter = "B"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color):
-        super().__init__(position, color)
+    def __init__(self, position, color, move_count=0):
+        super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
         directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
@@ -167,8 +174,8 @@ class Queen(Piece):
     _letter = "Q"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color):
-        super().__init__(position, color)
+    def __init__(self, position, color, move_count=0):
+        super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
         directions = [(1, -1), (1, 0), (1, 1), (0, -1),
@@ -185,8 +192,8 @@ class King(Piece):
     _letter = "K"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color):
-        super().__init__(position, color)
+    def __init__(self, position, color, move_count=0):
+        super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
         directions = [(1, -1), (1, 0), (1, 1), (0, -1),
@@ -204,8 +211,8 @@ class Rook(Piece):
     _letter = "R"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color):
-        super().__init__(position, color)
+    def __init__(self, position, color, move_count=0):
+        super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
         directions = [(0, -1), (0, 1)]
@@ -222,8 +229,8 @@ class Knight(Piece):
     _letter = "N"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color):
-        super().__init__(position, color)
+    def __init__(self, position, color, move_count=0):
+        super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
         legal_moves = []

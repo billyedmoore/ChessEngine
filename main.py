@@ -18,5 +18,8 @@ for i in range(4, 8):
     g.print()
 
 m = Move((3, 7), (3, 7), promotion=True, promote_to=Queen)
+g.make_move(m)
+p = g.get_square((3, 7)).get_piece().move_count
+print(p)
 
-print(p._move_count)
+g.print()
