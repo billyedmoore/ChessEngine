@@ -59,6 +59,42 @@ class GameState:
     def ply_count(self):
         return self._moves.ply_count
 
+    @property
+    def check(self):
+        """
+        Denotes wether the board is currently in check
+
+        Possible Return Values:
+            "B" - Black is in check
+            "W" - White is in check
+            "BW" - Double Check
+            "" - Not in check
+        """
+        return_str = ""
+        colours = ["B", "W"]
+        king_positions = self.get_king_positions()
+        for colour in colours:
+            pieces = [
+                s._piece for s in self._squares if s._piece and s._piece.colour.upper() == colour]
+            king_pos = king_positions[colour].position
+            legal_moves = []
+            for piece in pieces:
+                legal_moves.extend(piece.get_legal_moves(self))
+
+            check_moves = [m for m in legal_moves if m.position_to == king_pos]
+            if len(check_moves) != 0:
+                return_str += colour
+        return return_str
+
+    def get_king_positions(self):
+        kings = [
+            s._piece for s in self._squares if s._piece and s._piece.letter.upper() == "K"]
+        positions = {}
+        for king in kings:
+            positions[king.colour.upper()] = king
+
+        return positions
+
     def _load_fen(self, fen_string):
         """
         load the pieces on the board from a FEN string (https://www.chessprogramming.org/Forsyth-Edwards_Notation).

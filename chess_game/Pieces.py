@@ -92,9 +92,8 @@ class Piece:
                 pos = (self.position[0]+(i*direction[0]),
                        self.position[1]+(i*direction[1]))
                 if game_state.square_exists(pos):
-                    if game_state.square_is_empty(pos):
-                        diag_moves.append(Move(self.position, pos))
-                    else:
+                    diag_moves.append(Move(self.position, pos))
+                    if not game_state.square_is_empty(pos):
                         break
         return diag_moves
 
@@ -114,9 +113,8 @@ class Pawn(Piece):
         super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
-        # TODO: implement promotion
         legal_moves = []
-        print(self.colour.upper())
+        # print(self.colour.upper())
 
         colour_info = {
             "B": {"start_row": 1, "end_row": 7, "direction": +1},
@@ -144,7 +142,7 @@ class Pawn(Piece):
             for direction in directions:
                 if not game_state.square_is_empty((self.position[0]+direction, self.position[1])):
                     legal_moves.append(
-                        self.position, (self.position[0]+direction, self.position[1]))
+                        Move(self.position, (self.position[0]+direction, self.position[1])))
 
         return legal_moves
 
