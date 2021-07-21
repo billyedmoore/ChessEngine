@@ -3,6 +3,7 @@ from chess_game.Move import Move
 from chess_game.GameState import GameState
 
 g = GameState(
-    fen_string="rnbqkbnr/pppp1ppp/3K4/4Qp2/8/8/PPPPPPPP/RNB2BNR w kq - 0 1")
+    fen_string="R1k5/7R/2Q3K1/8/8/6rq/PPPPPPPP/1NB2BNr b - - 0 1")
 g.print()
 print(g.check)
+print(g.checkmate)

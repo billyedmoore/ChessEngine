@@ -1,5 +1,6 @@
 from .Square import Square
 from .Pieces import Rook, Pawn, Bishop, King, Knight, Queen
+import copy  # standard libary
 
 
 class MoveStack:
@@ -72,11 +73,11 @@ class GameState:
         """
         return_str = ""
         colours = ["B", "W"]
-        king_positions = self.get_king_positions()
+        kings = self.get_kings()
         for colour in colours:
             pieces = [
                 s._piece for s in self._squares if s._piece and s._piece.colour.upper() == colour]
-            king_pos = king_positions[colour].position
+            king_pos = kings[colour].position
             legal_moves = []
             for piece in pieces:
                 legal_moves.extend(piece.get_legal_moves(self))
@@ -86,7 +87,40 @@ class GameState:
                 return_str += colour
         return return_str
 
-    def get_king_positions(self):
+    @property
+    def checkmate(self):
+        """
+        Denotes wether the board is currently in checkmate
+
+        Possible Return Values:
+            "B" - Black is in check
+            "W" - White is in check
+            "BW" - Double Check
+            "" - Not in check
+        """
+        check = self.check
+        if not check:
+            return ""
+        else:
+            return_str = ""
+            colours = [c for c in check]  # splits check into chars
+            for colour in colours:
+                pieces = [
+                    s._piece for s in self._squares if s._piece and s._piece.colour.upper() == colour]
+                legal_moves = []
+                for piece in pieces:
+                    legal_moves.extend(piece.get_legal_moves(self))
+
+                for move in legal_moves:
+                    gamestate_cpy = copy.deepcopy(self)
+                    gamestate_cpy.make_move(move)
+                    if colour not in gamestate_cpy.check.split():
+                        break
+                else:
+                    return_str += colour
+        return return_str
+
+    def get_kings(self):
         kings = [
             s._piece for s in self._squares if s._piece and s._piece.letter.upper() == "K"]
         positions = {}
@@ -105,7 +139,7 @@ class GameState:
         """
         letter_lookup = {"r": Rook, "n": Knight,
                          "p": Pawn, "b": Bishop, "k": King, "q": Queen}
-
+        # R1k5/7R/2Q3K1/8/8/6rq/PPPPPPPP/1NB2BNr b - - 0 1
         ranks = fen_string.split(" ")[0].split("/")
 
         for rank_index in range(len(ranks)):
@@ -132,7 +166,8 @@ class GameState:
                         letter_lookup[ranks[rank_index][chars_evaluated].lower()](squares[x].position, color))
                     chars_evaluated += 1
 
-            self._squares.extend(squares)  # overwrites the current squares
+            # Adds the values from this rank to the _squares list
+            self._squares.extend(squares)
 
     def print(self):
         """
@@ -165,7 +200,11 @@ class GameState:
         """
         square_from = self.get_square(move.position_from)
 
-        piece = square_from.get_piece()  # only a copy as the move may be invalid
+        piece = square_from.get_piece()  # not pop incase move fails
+        if not piece:
+            print([s._piece for s in self._squares])
+            # print(square_from._piece)
+            # print(move.position_from, move.position_to)
         square_to = self.get_square(move.position_to)
         formated_moves = [(m.position_from, m.position_to, m.promotion)
                           for m in piece.get_legal_moves(self)]

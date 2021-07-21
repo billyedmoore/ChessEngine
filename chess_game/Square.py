@@ -44,7 +44,7 @@ class Square:
     def get_piece(self):
         """
         Returns the current piece without setting the piece attribute to None
-        Essentially makes a copy of the Piece
+        Essentially returns a refrence to the piece
         """
         return self._piece
 
