@@ -75,9 +75,14 @@ class GameState:
         colours = ["B", "W"]
         kings = self.get_kings()
         for colour in colours:
+            # TODO: failing test cases
             pieces = [
                 s._piece for s in self._squares if s._piece and s._piece.colour.upper() == colour]
-            king_pos = kings[colour].position
+            # print(kings)
+            try:
+                king_pos = kings[colour].position
+            except:
+                return_str += colour
             legal_moves = []
             for piece in pieces:
                 legal_moves.extend(piece.get_legal_moves(self))
@@ -112,13 +117,15 @@ class GameState:
                     legal_moves.extend(piece.get_legal_moves(self))
 
                 for move in legal_moves:
-                    gamestate_cpy = copy.deepcopy(self)
-                    gamestate_cpy.make_move(move)
-                    if colour not in gamestate_cpy.check.split():
+                    self.make_move(move)  # why does this affect self
+                    check_str = self.check.split()
+                    self.undo_move()
+                    # self.print()
+                    if colour not in check_str:
                         break
                 else:
                     return_str += colour
-        return return_str
+            return return_str
 
     def get_kings(self):
         kings = [
@@ -198,23 +205,12 @@ class GameState:
         """
         Play a move on the GameState
         """
-        square_from = self.get_square(move.position_from)
-
-        piece = square_from.get_piece()  # not pop incase move fails
-        if not piece:
-            print([s._piece for s in self._squares])
-            # print(square_from._piece)
-            # print(move.position_from, move.position_to)
-        square_to = self.get_square(move.position_to)
-        formated_moves = [(m.position_from, m.position_to, m.promotion)
-                          for m in piece.get_legal_moves(self)]
-        print(formated_moves)
-        if (square_from.position, square_to.position, move.promotion) not in formated_moves:
+        if not move.is_legal_move():
             raise Exception(
-                f"Invalid Move {(square_from.position,square_to.position)}")
-
-        # now the move is valid remove piece from square_from
-        square_from.pop_piece()
+                f"Invalid Move {(move.position_from,move.position_to)}")
+        square_from = self.get_square(move.position_from)
+        piece = square_from.pop_piece()
+        square_to = self.get_square(move.position_to)
         if move.promotion:
             square_from.set_piece(move.promote_to(
                 square_from.position, piece.colour, move_count=piece.move_count))
@@ -225,6 +221,20 @@ class GameState:
             piece.make_move(square_to.position)
             square_to.set_piece(piece)
         self._moves.push(move)
+
+    def undo_move(self):
+        # TODO: handle no moves having been made yet
+        move = self._moves.pop()
+        square_from = self.get_square(move.position_from)
+        square_to = self.get_square(move.position_to)
+        piece = square_to.pop_piece()  # not pop incase move fails
+        if move.promotion:
+            square_from.set_piece(move.promote_from(
+                square_from.position, piece.colour, move_count=piece.move_count))
+        else:
+            if move.captured:
+                square_to.set_piece(move.captured)
+            square_from.set_piece(piece)
 
     def get_square(self, position: tuple):
         return(self._squares[position[0] +

@@ -92,7 +92,7 @@ class Piece:
                 pos = (self.position[0]+(i*direction[0]),
                        self.position[1]+(i*direction[1]))
                 if game_state.square_exists(pos):
-                    diag_moves.append(Move(self.position, pos))
+                    diag_moves.append(Move(game_state, self.position, pos))
                     if not game_state.square_is_empty(pos):
                         break
         return diag_moves
@@ -125,16 +125,16 @@ class Pawn(Piece):
             move_to = (self.position[0], self.position[1] +
                        (2*info["direction"]))
             if game_state.square_exists(move_to):
-                legal_moves.append(Move(self.position, move_to))
+                legal_moves.append(Move(game_state, self.position, move_to))
 
         if self.position[1] != info["end_row"]:
             move_to = (self.position[0], self.position[1] +
                        (info["direction"]))
             if game_state.square_exists(move_to):
-                legal_moves.append(Move(self.position, move_to))
+                legal_moves.append(Move(game_state, self.position, move_to))
         else:
             legal_moves.append(
-                Move(self.position, self.position, promotion=True))
+                Move(game_state, self.position, self.position, promotion=True))
 
         # en-passant
         if self.position[1] == info["start_row"]+(2*info["direction"]):
@@ -142,7 +142,7 @@ class Pawn(Piece):
             for direction in directions:
                 if not game_state.square_is_empty((self.position[0]+direction, self.position[1])):
                     legal_moves.append(
-                        Move(self.position, (self.position[0]+direction, self.position[1])))
+                        Move(game_state, self.position, (self.position[0]+direction, self.position[1])))
 
         return legal_moves
 
@@ -242,6 +242,7 @@ class Knight(Piece):
             possible_move_to = (
                 self.position[0]+change[0], self.position[1]+change[1])
             if game_state.square_exists(possible_move_to) and game_state.square_is_empty(possible_move_to):
-                legal_moves.append(Move(self.position, possible_move_to))
+                legal_moves.append(
+                    Move(game_state, self.position, possible_move_to))
 
         return legal_moves
