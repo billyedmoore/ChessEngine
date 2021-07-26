@@ -28,6 +28,9 @@ class Move:
             gamestate.get_square(self._position_from)._piece)
         self._position_to = to_pos
 
+    def clone(self):
+        return Move(self._gamestate, self.position_from, self.position_to, promotion=self.promotion, promote_to=self.promote_to)
+
     def is_legal_move(self):
         square_from = self._gamestate.get_square(self.position_from)
         piece = square_from.get_piece()  # not pop incase move fails

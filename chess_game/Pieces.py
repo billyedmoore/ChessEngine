@@ -2,7 +2,6 @@ from .Move import Move
 
 
 class Piece:
-
     """
     Abstract class to be implemented by the individual piece type
 
@@ -21,6 +20,9 @@ class Piece:
         self._move_count = move_count
         self._position = position
         self._colour = color
+
+    def clone(self):
+        return type(self)(self.position, self.colour, move_count=self.move_count)
 
     @property
     def move_count(self) -> int:

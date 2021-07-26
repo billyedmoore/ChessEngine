@@ -16,6 +16,13 @@ class Square:
     def __init__(self, position):
         self._position = position
 
+    def clone(self):
+        clone = Square(self.position)
+        if self._piece:
+            piece_cpy = self._piece.clone()
+            clone.set_piece(piece_cpy)
+        return clone
+
     @property
     def position(self):
         """

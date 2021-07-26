@@ -1,6 +1,5 @@
 from .Square import Square
 from .Pieces import Rook, Pawn, Bishop, King, Knight, Queen
-import copy  # standard libary
 
 
 class MoveStack:
@@ -9,6 +8,10 @@ class MoveStack:
     Basically a glorified property
     """
     _moves = []
+
+    def clone(self):
+        cpy = MoveStack()
+        cpy._moves = self._moves
 
     @property
     def ply_count(self):
@@ -41,7 +44,7 @@ class GameState:
     The current state of the game including the pieces & the Moves already made
 
     Methods:
-        GameState(starting_position : string) (constructor)
+        GameState(fen_string : string) (constructor) 
         _load_fen(fen_string: string)
         make_move(move: Move)
         square_exists(position: tuple(x,y))
@@ -54,7 +57,24 @@ class GameState:
     # _squares = [Square(0,0),Square(0,1),...,Square(1,0),Square(1,1),...,Square(2,0)]
 
     def __init__(self, fen_string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
-        self._load_fen(fen_string)
+        """
+        Parameters:
+            string fen_string - string in fen format or empty string to not
+                                generate a board of squares
+        """
+        if fen_string:
+            self._load_fen(fen_string)
+
+    def clone(self):
+        """
+        Creates a copy of the GameState
+        """
+        copy = GameState(fen_string="")
+        copy._captured_pieces = [p.clone() for p in self._captured_pieces]
+        squares = [s for s in self._squares]
+        copy._squares = [s.clone() for s in squares]
+        copy._moves = self._moves.clone()
+        return copy
 
     @property
     def ply_count(self):
@@ -75,7 +95,6 @@ class GameState:
         colours = ["B", "W"]
         kings = self.get_kings()
         for colour in colours:
-            # TODO: failing test cases
             pieces = [
                 s._piece for s in self._squares if s._piece and s._piece.colour.upper() == colour]
             # print(kings)
@@ -119,8 +138,9 @@ class GameState:
                 for move in legal_moves:
                     self.make_move(move)  # why does this affect self
                     check_str = self.check.split()
+                    print(
+                        f"{move.position_to} -> {move.position_from} - {check_str}")
                     self.undo_move()
-                    # self.print()
                     if colour not in check_str:
                         break
                 else:
