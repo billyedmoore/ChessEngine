@@ -12,6 +12,7 @@ class MoveStack:
     def clone(self):
         cpy = MoveStack()
         cpy._moves = self._moves
+        return cpy
 
     @property
     def ply_count(self):
@@ -65,7 +66,7 @@ class GameState:
         if fen_string:
             self._load_fen(fen_string)
 
-    def clone(self) -> GameState:
+    def clone(self):
         """
         Creates a copy of the GameState
         """
@@ -94,11 +95,26 @@ class GameState:
             if s._piece and s._piece.letter.lower() == "k"
             and s._piece.colour.upper() == colour.upper()][0]
         opposition_king_pos = opposition_king.position
+
+        # psuedolegal so it doesn't have to call game_state.check and get stuck
+        # in infinite loop
         legal_moves = self.get_pseudolegal_moves(opposition_colour)
+
         for move in legal_moves:
+            # if would capture king
             if move.position_to == opposition_king_pos:
                 return True
         return False
+
+    def checkmate(self, colour: str) -> bool:
+        """
+        Returns a bool value repersenting wether the colour specified is in 
+        checkmate
+
+        Parameters
+            string colour - value from the set {"w","W","b","B"}
+        """
+        return(len(self.get_legal_moves(colour)) == 0)
 
     def get_legal_moves(self, colour: str):
         """
@@ -192,11 +208,11 @@ class GameState:
         """
         pass
 
-    def make_move(self, move):
+    def make_move(self, move, check_legality=True):
         """
         Play a move on the GameState
         """
-        if not move.is_legal_move():
+        if check_legality and not move.is_legal_move():
             raise Exception(
                 f"Invalid Move {(move.position_from,move.position_to)}")
         square_from = self.get_square(move.position_from)

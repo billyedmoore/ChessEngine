@@ -115,7 +115,7 @@ class Piece:
         legal_moves = []
         for move in moves:
             gs_copy = game_state.clone()
-            gs_copy.make_move(move)
+            gs_copy.make_move(move, check_legality=False)
             if not gs_copy.check(self.colour):
                 legal_moves.append(move)
 
