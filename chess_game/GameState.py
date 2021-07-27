@@ -65,7 +65,7 @@ class GameState:
         if fen_string:
             self._load_fen(fen_string)
 
-    def clone(self):
+    def clone(self) -> GameState:
         """
         Creates a copy of the GameState
         """
@@ -80,21 +80,21 @@ class GameState:
     def ply_count(self):
         return self._moves.ply_count
 
-    def check(self, colour: str):
+    def check(self, colour: str) -> bool:
         """
         Returns a bool value repersenting wether the colour specified is in check
 
         Parameters
             string colour - value from the set {"w","W","b","B"}
         """
-        opposition_colour = ["B", "W"][["W", "B"].index(colour)]
-        # breaks if no opposition_king on board
+        opposition_colour = ["B", "W"][["W", "B"].index(colour.upper())]
+        # TODO: handle no opposition_king on board
         opposition_king = [
             s._piece for s in self._squares
             if s._piece and s._piece.letter.lower() == "k"
             and s._piece.colour.upper() == colour.upper()][0]
         opposition_king_pos = opposition_king.position
-        legal_moves = self.get_legal_moves(opposition_colour)
+        legal_moves = self.get_pseudolegal_moves(opposition_colour)
         for move in legal_moves:
             if move.position_to == opposition_king_pos:
                 return True
@@ -107,12 +107,24 @@ class GameState:
         Parameters
             string colour - value from the set {"w","W","b","B"}
         """
-        pieces_of_colour = [
-            s._piece for s in self._squares if s._piece and
-            s._piece.colour.upper() == colour.upper()]
+        pieces_of_colour = self.get_pieces_by_colour(colour)
         legal_moves = []
         for piece in pieces_of_colour:
             legal_moves.extend(piece.get_legal_moves(self))
+        return legal_moves
+
+    def get_pseudolegal_moves(self, colour: str):
+        """
+        Gets psuedolegal moves for a given colour. Includes moves that don't
+        break check when in check. To be used to determine check.
+
+        Parameters
+            string colour - value from the set {"w","W","b","B"}
+        """
+        pieces_of_colour = self.get_pieces_by_colour(colour)
+        legal_moves = []
+        for piece in pieces_of_colour:
+            legal_moves.extend(piece.get_pseudolegal_moves(self))
         return legal_moves
 
     def _load_fen(self, fen_string):
@@ -214,6 +226,17 @@ class GameState:
             if move.captured:
                 square_to.set_piece(move.captured)
             square_from.set_piece(piece)
+
+    def get_pieces_by_colour(self, colour: str):
+        """
+        Gets all of the pieces of a given colour.
+
+        Parameters
+            string colour - value from the set {"w","W","b","B"}
+        """
+        return [
+            s._piece for s in self._squares if s._piece and
+            s._piece.colour.upper() == colour.upper()]
 
     def get_square(self, position: tuple):
         return(self._squares[position[0] +

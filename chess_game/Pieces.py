@@ -73,7 +73,13 @@ class Piece:
         self._move_count += 1
 
     def get_legal_moves(self, game_state):
-        pass
+        moves = self._get_legal_moves(game_state)
+        if game_state.check(self.colour):
+            moves = self._remove_moves_that_dont_break_check(game_state, moves)
+        return moves
+
+    def get_pseudolegal_moves(self, game_state):
+        return self._get_legal_moves(game_state)
 
     def _get_possible_moves(self, game_state, directions, max_range=8):
         """
@@ -99,6 +105,22 @@ class Piece:
                         break
         return diag_moves
 
+    # awful name but I got nothing better
+    def _remove_moves_that_dont_break_check(self, game_state, moves):
+        """
+        Removes, from a list of moves, moves that do not take the player out of
+        check. This is to be used when a player is in check and as a result is 
+        obliged to play a move out of check if one exists
+        """
+        legal_moves = []
+        for move in moves:
+            gs_copy = game_state.clone()
+            gs_copy.make_move(move)
+            if not gs_copy.check(self.colour):
+                legal_moves.append(move)
+
+        return legal_moves
+
     @colour.setter
     def colour(self, value):
         self._colour = value
@@ -114,7 +136,7 @@ class Pawn(Piece):
     def __init__(self, position, color, move_count=0):
         super().__init__(position, color, move_count=move_count)
 
-    def get_legal_moves(self, game_state):
+    def _get_legal_moves(self, game_state):
         legal_moves = []
         # print(self.colour.upper())
 
@@ -160,7 +182,7 @@ class Bishop(Piece):
     def __init__(self, position, color, move_count=0):
         super().__init__(position, color, move_count=move_count)
 
-    def get_legal_moves(self, game_state):
+    def _get_legal_moves(self, game_state):
         directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
         legal_moves = self._get_possible_moves(game_state, directions)
         return legal_moves
@@ -177,7 +199,7 @@ class Queen(Piece):
     def __init__(self, position, color, move_count=0):
         super().__init__(position, color, move_count=move_count)
 
-    def get_legal_moves(self, game_state):
+    def _get_legal_moves(self, game_state):
         directions = [(1, -1), (1, 0), (1, 1), (0, -1),
                       (0, 1), (-1, 1), (-1, -1), (-1, 0)]
         legal_moves = self._get_possible_moves(game_state, directions)
@@ -195,7 +217,7 @@ class King(Piece):
     def __init__(self, position, color, move_count=0):
         super().__init__(position, color, move_count=move_count)
 
-    def get_legal_moves(self, game_state):
+    def _get_legal_moves(self, game_state):
         directions = [(1, -1), (1, 0), (1, 1), (0, -1),
                       (0, 1), (-1, 1), (-1, -1), (-1, 0)]
         legal_moves = self._get_possible_moves(
@@ -214,7 +236,7 @@ class Rook(Piece):
     def __init__(self, position, color, move_count=0):
         super().__init__(position, color, move_count=move_count)
 
-    def get_legal_moves(self, game_state):
+    def _get_legal_moves(self, game_state):
         directions = [(0, -1), (0, 1), (1, 0), (-1, 0)]
         legal_moves = self._get_possible_moves(
             game_state, directions)
@@ -232,7 +254,7 @@ class Knight(Piece):
     def __init__(self, position, color, move_count=0):
         super().__init__(position, color, move_count=move_count)
 
-    def get_legal_moves(self, game_state):
+    def _get_legal_moves(self, game_state):
         legal_moves = []
 
         # Chose not to generate these programatically as would only slow down
