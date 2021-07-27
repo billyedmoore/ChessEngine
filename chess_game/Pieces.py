@@ -215,7 +215,7 @@ class Rook(Piece):
         super().__init__(position, color, move_count=move_count)
 
     def get_legal_moves(self, game_state):
-        directions = [(0, -1), (0, 1)]
+        directions = [(0, -1), (0, 1), (1, 0), (-1, 0)]
         legal_moves = self._get_possible_moves(
             game_state, directions)
         return legal_moves
