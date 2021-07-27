@@ -80,14 +80,40 @@ class GameState:
     def ply_count(self):
         return self._moves.ply_count
 
-    def get_kings(self):
-        kings = [
-            s._piece for s in self._squares if s._piece and s._piece.letter.upper() == "K"]
-        positions = {}
-        for king in kings:
-            positions[king.colour.upper()] = king
+    def check(self, colour: str):
+        """
+        Returns a bool value repersenting wether the colour specified is in check
 
-        return positions
+        Parameters
+            string colour - value from the set {"w","W","b","B"}
+        """
+        opposition_colour = ["B", "W"][["W", "B"].index(colour)]
+        # breaks if no opposition_king on board
+        opposition_king = [
+            s._piece for s in self._squares
+            if s._piece and s._piece.letter.lower() == "k"
+            and s._piece.colour.upper() == colour.upper()][0]
+        opposition_king_pos = opposition_king.position
+        legal_moves = self.get_legal_moves(opposition_colour)
+        for move in legal_moves:
+            if move.position_to == opposition_king_pos:
+                return True
+        return False
+
+    def get_legal_moves(self, colour: str):
+        """
+        Gets legal moves for a given colour
+
+        Parameters
+            string colour - value from the set {"w","W","b","B"}
+        """
+        pieces_of_colour = [
+            s._piece for s in self._squares if s._piece and
+            s._piece.colour.upper() == colour.upper()]
+        legal_moves = []
+        for piece in pieces_of_colour:
+            legal_moves.extend(piece.get_legal_moves(self))
+        return legal_moves
 
     def _load_fen(self, fen_string):
         """
