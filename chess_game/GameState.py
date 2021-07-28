@@ -204,9 +204,30 @@ class GameState:
     def generate_fen(self):
         """
         Generate fen of the current position
-        intended for use in debugging more than the actual game
         """
-        pass
+        fen_str = ""
+
+        # for some reson this invents some kings
+        pieces = [s.get_piece() for s in self._squares]
+        board = [pieces[i:i+8] for i in range(0, 64, 8)]
+
+        print(board)
+        for row in board:
+            counter = 0
+            for y in row:
+                if y:
+                    if counter == 0:
+                        fen_str += y.letter
+                    else:
+                        fen_str += f"{counter}{y.letter}"
+                        counter = 0
+                else:
+                    counter += 1
+            if counter != 0:
+                fen_str += str(counter)
+            fen_str += "/"
+
+        return fen_str[: -1]
 
     def make_move(self, move, check_legality=True):
         """
@@ -255,12 +276,21 @@ class GameState:
             s._piece.colour.upper() == colour.upper()]
 
     def get_square(self, position: tuple):
+        """
+        Gets a square at a given position
+
+        Parameters:
+            tuple position - a position in format (x,y) where (0 <= x,y <= 7)
+        """
         return(self._squares[position[0] +
                              (position[1] * 8)])
 
     def square_exists(self, position: tuple):
         """
         Checks if a square (denoted by some coords) exists
+
+        Parameters:
+            tuple position - a position in format (x,y) where (0 <= x,y <= 7)
         """
         def pos_in_range(pos):
             return(pos < 8 and pos >= 0)
@@ -268,5 +298,11 @@ class GameState:
         return(pos_in_range(position[0]) and pos_in_range(position[1]))
 
     def square_is_empty(self, position: tuple):
+        """
+        Checks if square at a given position is empty 
+
+        Parameters:
+            tuple position - a position in format (x,y) where (0 <= x,y <= 7)
+        """
         square_index = position[1]*8 + position[0]
         return not bool(self._squares[square_index]._piece)
