@@ -54,6 +54,7 @@ class GameState:
     _squares = []
     _captured_pieces = []
     _moves = MoveStack()
+    _player_to_play = "W"
 
     # _squares = [Square(0,0),Square(0,1),...,Square(1,0),Square(1,1),...,Square(2,0)]
 
@@ -115,6 +116,9 @@ class GameState:
             string colour - value from the set {"w","W","b","B"}
         """
         return(len(self.get_legal_moves(colour)) == 0)
+
+    def get_player_to_play(self) -> str:
+        return _player_to_play
 
     def get_legal_moves(self, colour: str):
         """
@@ -227,7 +231,7 @@ class GameState:
                 fen_str += str(counter)
             fen_str += "/"
 
-        return fen_str[: -1]
+        return f"{fen_str[: -1]} {self._player_to_play.lower()}"
 
     def make_move(self, move, check_legality=True):
         """
@@ -249,6 +253,8 @@ class GameState:
             piece.make_move(square_to.position)
             square_to.set_piece(piece)
         self._moves.push(move)
+        self._player_to_play = ["B", "W"][[
+            "W", "B"].index(self._player_to_play)]
 
     def undo_move(self):
         # TODO: handle no moves having been made yet
