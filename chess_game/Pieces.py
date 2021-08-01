@@ -1,4 +1,4 @@
-from .Move import Move
+from .Move import Move, PromotionMove
 
 
 class Piece:
@@ -158,7 +158,7 @@ class Pawn(Piece):
                 legal_moves.append(Move(game_state, self.position, move_to))
         else:
             legal_moves.append(
-                Move(game_state, self.position, self.position, promotion=True))
+                PromotionMove(game_state, self.position))
 
         # en-passant
         if self.position[1] == info["start_row"]+(2*info["direction"]):

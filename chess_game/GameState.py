@@ -1,5 +1,6 @@
 from .Square import Square
 from .Pieces import Rook, Pawn, Bishop, King, Knight, Queen
+from .Move import PromotionMove
 
 
 class MoveStack:
@@ -215,7 +216,6 @@ class GameState:
         pieces = [s.get_piece() for s in self._squares]
         board = [pieces[i:i+8] for i in range(0, 64, 8)]
 
-        print(board)
         for row in board:
             counter = 0
             for y in row:
@@ -240,13 +240,18 @@ class GameState:
         if check_legality and not move.is_legal_move():
             raise Exception(
                 f"Invalid Move {(move.position_from,move.position_to)}")
-        square_from = self.get_square(move.position_from)
-        piece = square_from.pop_piece()
-        square_to = self.get_square(move.position_to)
         if move.promotion:
-            square_from.set_piece(move.promote_to(
-                square_from.position, piece.colour, move_count=piece.move_count))
+            square = self.get_square(move.position)
+            piece = square.pop_piece()
+            piece_to_type = move.promote_to
+            square.set_piece(piece_to_type(
+                square.position, piece.colour, move_count=piece.move_count))
+        elif move.castling:
+            pass
         else:
+            square_from = self.get_square(move.position_from)
+            piece = square_from.pop_piece()
+            square_to = self.get_square(move.position_to)
             if not self.square_is_empty(square_to.position):
                 captured_piece = square_to.pop_piece()
                 self._captured_pieces.append(captured_piece)
