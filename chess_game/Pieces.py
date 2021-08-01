@@ -1,4 +1,4 @@
-from .Move import Move, PromotionMove
+from .Move import Move, PromotionMove, CastlingMove
 
 
 class Piece:
@@ -109,7 +109,7 @@ class Piece:
     def _remove_moves_that_dont_break_check(self, game_state, moves):
         """
         Removes, from a list of moves, moves that do not take the player out of
-        check. This is to be used when a player is in check and as a result is 
+        check. This is to be used when a player is in check and as a result is
         obliged to play a move out of check if one exists
         """
         legal_moves = []
@@ -222,7 +222,37 @@ class King(Piece):
                       (0, 1), (-1, 1), (-1, -1), (-1, 0)]
         legal_moves = self._get_possible_moves(
             game_state, directions, max_range=2)
-        return legal_moves
+
+        if self.move_count == 0:
+            king_row = {"w": 7, "b": 0}
+            y = king_row[self.colour.lower()]
+            castling_positions = {(2, y): "q", (6, y): "k"}
+            possible_castling_moves = [
+                Move(game_state, self.position, castle_pos) for castle_pos in castling_positions.keys()]
+
+            for move in possible_castling_moves:
+                # check wether a check can be made
+                can_castle = True
+                positions = {"k": {"rook_pos": (7, y)}, "q": {
+                    "rook_pos": (0, y)}}
+                side = castling_positions[move.position_to]
+                rook_pos = positions[side]["rook_pos"]
+                rook = game_state.get_square(rook_pos).get_piece()
+                if not rook or rook.move_count != 0:
+                    can_castle = False
+
+                direction = (1 if side == "q" else -1)
+                for x in range(rook_pos[0]+direction, self.position[0], direction):
+                    print(x, y)
+                    piece = game_state.get_square((x, y)).get_piece()
+                    if piece:
+                        can_castle = False
+
+                if can_castle:
+                    legal_moves.append(CastlingMove(
+                        game_state, self.position, side))
+
+            return legal_moves
 
 
 class Rook(Piece):

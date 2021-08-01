@@ -104,8 +104,11 @@ class GameState:
 
         for move in legal_moves:
             # if would capture king
-            if move.position_to == opposition_king_pos:
-                return True
+            try:
+                if move.position_to == opposition_king_pos:
+                    return True
+            except AttributeError:
+                pass
         return False
 
     def checkmate(self, colour: str) -> bool:
