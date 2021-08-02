@@ -243,23 +243,8 @@ class GameState:
         if check_legality and not move.is_legal_move():
             raise Exception(
                 f"Invalid Move {(move.position_from,move.position_to)}")
-        if move.promotion:
-            square = self.get_square(move.position)
-            piece = square.pop_piece()
-            piece_to_type = move.promote_to
-            square.set_piece(piece_to_type(
-                square.position, piece.colour, move_count=piece.move_count))
-        elif move.castling:
-            pass
-        else:
-            square_from = self.get_square(move.position_from)
-            piece = square_from.pop_piece()
-            square_to = self.get_square(move.position_to)
-            if not self.square_is_empty(square_to.position):
-                captured_piece = square_to.pop_piece()
-                self._captured_pieces.append(captured_piece)
-            piece.make_move(square_to.position)
-            square_to.set_piece(piece)
+        move.perform()
+
         self._moves.push(move)
         self._player_to_play = ["B", "W"][[
             "W", "B"].index(self._player_to_play)]

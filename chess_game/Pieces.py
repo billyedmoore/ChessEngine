@@ -243,7 +243,6 @@ class King(Piece):
 
                 direction = (1 if side == "q" else -1)
                 for x in range(rook_pos[0]+direction, self.position[0], direction):
-                    print(x, y)
                     piece = game_state.get_square((x, y)).get_piece()
                     if piece:
                         can_castle = False
