@@ -240,10 +240,17 @@ class King(Piece):
                 rook = game_state.get_square(rook_pos).get_piece()
                 if not rook or rook.move_count != 0:
                     can_castle = False
-
+                    continue
+                colour = rook.colour
                 direction = (1 if side == "q" else -1)
+                opposition_colour = ["B", "W"][[
+                    "W", "B"].index(colour.upper())]
                 for x in range(rook_pos[0]+direction, self.position[0], direction):
-                    piece = game_state.get_square((x, y)).get_piece()
+                    square = game_state.get_square((x, y))
+                    if square.is_under_attack(colours=opposition_colour):
+                        if (x, y) != (1, y):
+                            can_castle = False
+                    piece = square.get_piece()
                     if piece:
                         can_castle = False
 

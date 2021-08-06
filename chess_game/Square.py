@@ -1,3 +1,6 @@
+from .Move import Move, PromotionMove
+
+
 class Square:
     """
     A class to represent one square on a chess board
@@ -13,8 +16,9 @@ class Square:
     _position = None
     _piece = None
 
-    def __init__(self, position):
+    def __init__(self, gamestate, position):
         self._position = position
+        self._gamestate = gamestate
 
     def clone(self):
         clone = Square(self.position)
@@ -22,6 +26,22 @@ class Square:
             piece_cpy = self._piece.clone()
             clone.set_piece(piece_cpy)
         return clone
+
+    def is_under_attack(self, colours="bw"):
+        moves = []
+        for col in list(colours):
+            moves += [m for m in self._gamestate.get_pseudolegal_moves(
+                col)]
+
+        for move in moves:
+            if type(move) == Move:
+                if move.position_to == self.position:
+                    return True
+            if type(move) == PromotionMove:
+                if move.position == self.position:
+                    return True
+        else:
+            return False
 
     @property
     def position(self):
@@ -31,7 +51,8 @@ class Square:
         return self._position
 
     @position.setter
-    def position(self, pos, game):
+    def position(self, pos):
+        game = self._gamestate
         if game.square_exists(pos) and game.square_is_empty(pos):
             self._position = pos
         else:

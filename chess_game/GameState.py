@@ -169,7 +169,7 @@ class GameState:
             skip_counter = 0  # the number of empty squares before the next full one
             chars_evaluated = 0  # the number of chars of the rank that have already been acted upon
             for x in range(8):  # for each row of the chessboard
-                squares.append(Square((x, rank_index)))
+                squares.append(Square(self, (x, rank_index)))
                 if skip_counter != 0:
                     skip_counter = skip_counter - 1
                     continue
