@@ -1,3 +1,5 @@
+
+
 class BaseMove:
     """
     A class to represent a move.
@@ -9,7 +11,7 @@ class BaseMove:
     """
 
     # set to the piece captured in this move if one is to allow move to be undone
-    _captured_pieces = None
+    _captured_pieces = []
 
     def __init__(self, gamestate):
         self._gamestate = gamestate
@@ -47,9 +49,82 @@ class BaseMove:
     def castling(self):
         return (type(self) == CastlingMove)
 
+    @staticmethod
+    def from_algebraic_notation(gamestate, colour_moving, algebraic_move):
+        """
+        returns a Move formulated from an algebraic notation
+        """
+        # This is the worst function I have ever written
+        print("from_algebraic_notation")
+        # print(algebraic_move)
+        piece_letters = ["R", "N", "P", "B", "K", "Q"]
+        file_values = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        rank_values = ["8", "7", "6", "5", "4", "3", "2", "1"]
+
+        # TODO remove only for troubleshooting
+        if not gamestate:
+            print(f"{gamestate} - {colour_moving} - {algebraic_move}")
+
+        def get_king(colour):
+            king = [p for p in gamestate.get_pieces_by_colour(colour)
+                    if p.letter.upper() == "K"][0]
+            return king
+
+        def coord_to_pos(coord):
+            try:
+                return (file_values.index(coord[0]), rank_values.index(coord[1]))
+            except ValueError:
+                return None
+
+        if not algebraic_move:
+            return None
+
+        # ignore captures and checks as not relevant or helpful
+        algebraic_move = "".join(
+            [char for char in algebraic_move if char != "+" and char != "x"])
+        print(algebraic_move)
+
+        # if no piece is stated then a pawn is moving
+        if algebraic_move[0] in file_values:
+            algebraic_move = "P" + algebraic_move
+
+        # denotes a promotion move
+        if "=" in algebraic_move:
+            pass
+        elif algebraic_move[0] in piece_letters:
+            coord = coord_to_pos(algebraic_move[-2:])
+            if not coord:
+                return None
+            possible_moves = [
+                m for m in gamestate.get_legal_moves(colour_moving)
+                if type(m) == Move and
+                m.position_to == coord
+                and gamestate.get_square(m.position_from).get_piece().letter.upper() == algebraic_move[0]]
+            if len(possible_moves) == 1:
+                return possible_moves[0]
+            elif len(possible_moves) == 0:
+                return None
+            else:
+                if algebraic_move[-3] in rank_values:
+                    rank_values.index[algebraic_move[-3]]
+                elif algebraic_move[-3] in file_values:
+                    pass
+                print(
+                    "More than one move is possible and I cba to deal with that bs right now")
+                print(possible_moves)
+        elif algebraic_move.strip() == "O-O":
+            king = get_king(colour_moving)
+            return CastlingMove(gamestate, king.position, "k")
+        elif algebraic_move.strip() == "O-O-O":
+            king = get_king(colour_moving)
+            return CastlingMove(gamestate, king.position, "q")
+        else:
+            pass
+
 
 class Move(BaseMove):
     def __init__(self, gamestate, from_pos, to_pos):
+        super().__init__(gamestate)
         self._position_from = from_pos
         self._position_to = to_pos
 
@@ -65,7 +140,7 @@ class Move(BaseMove):
         square_from = self._gamestate.get_square(self.position_from)
         piece = square_from.pop_piece()
         square_to = self._gamestate.get_square(self.position_to)
-        if not self.square_is_empty(square_to.position):
+        if not self._gamestate.square_is_empty(square_to.position):
             captured_piece = square_to.pop_piece()
             self._captured_pieces.append(captured_piece)
         piece.make_move(square_to.position)

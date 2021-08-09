@@ -56,6 +56,8 @@ class GameState:
     _captured_pieces = []
     _moves = MoveStack()
     _player_to_play = "W"
+    piece_letters = {"r": Rook, "n": Knight,
+                     "p": Pawn, "b": Bishop, "k": King, "q": Queen}
 
     # _squares = [Square(0,0),Square(0,1),...,Square(1,0),Square(1,1),...,Square(2,0)]
 
@@ -64,6 +66,7 @@ class GameState:
         Parameters:
             string fen_string - string in fen format or empty string to not
                                 generate a board of squares
+
         """
         if fen_string:
             self._load_fen(fen_string)
@@ -75,13 +78,22 @@ class GameState:
         copy = GameState(fen_string="")
         copy._captured_pieces = [p.clone() for p in self._captured_pieces]
         squares = [s for s in self._squares]
-        copy._squares = [s.clone() for s in squares]
+        copy._squares = [s.clone(copy) for s in squares]
         copy._moves = self._moves.clone()
         return copy
 
     @property
     def ply_count(self):
         return self._moves.ply_count
+
+    @property
+    def player_to_play(self):
+        return self._player_to_play
+
+    @player_to_play.setter
+    def player_to_play(self, player):
+        if player.lower() in ["w", "b"]:
+            self._player_to_play = player
 
     def check(self, colour: str) -> bool:
         """
@@ -121,9 +133,6 @@ class GameState:
         """
         return(len(self.get_legal_moves(colour)) == 0)
 
-    def get_player_to_play(self) -> str:
-        return _player_to_play
-
     def get_legal_moves(self, colour: str):
         """
         Gets legal moves for a given colour
@@ -159,8 +168,8 @@ class GameState:
         Parameters:
             fen_string: a string that follows FEN notation (https://www.chessprogramming.org/Forsyth-Edwards_Notation)
         """
-        letter_lookup = {"r": Rook, "n": Knight,
-                         "p": Pawn, "b": Bishop, "k": King, "q": Queen}
+        letter_lookup = self.piece_letters
+
         # R1k5/7R/2Q3K1/8/8/6rq/PPPPPPPP/1NB2BNr b - - 0 1
         ranks = fen_string.split(" ")[0].split("/")
 
@@ -197,11 +206,11 @@ class GameState:
         """
 
         current_row = 0
-        output_string = f"{' ' * 3} A B C D E F G H\n{' ' * 4}{'_ ' * 8}\n{current_row + 1} | "
+        output_string = f"{' ' * 3} a b c d e f g h\n{' ' * 4}{'_ ' * 8}\n{8-current_row} | "
         for square in range(len(self._squares)):
             if square // 8 != current_row:
                 current_row = square // 8
-                output_string += f"\n{current_row + 1} | "
+                output_string += f"\n{8-(current_row)} | "
             empty = self._squares[square].is_empty()
             if empty:
                 output_string += "  "
@@ -284,7 +293,8 @@ class GameState:
         return(self._squares[position[0] +
                              (position[1] * 8)])
 
-    def square_exists(self, position: tuple):
+    @staticmethod
+    def square_exists(position: tuple):
         """
         Checks if a square (denoted by some coords) exists
 

@@ -20,8 +20,8 @@ class Square:
         self._position = position
         self._gamestate = gamestate
 
-    def clone(self):
-        clone = Square(self.position)
+    def clone(self, gamestate_clone):
+        clone = Square(gamestate_clone, self.position)
         if self._piece:
             piece_cpy = self._piece.clone()
             clone.set_piece(piece_cpy)
@@ -31,14 +31,11 @@ class Square:
         moves = []
         for col in list(colours):
             moves += [m for m in self._gamestate.get_pseudolegal_moves(
-                col)]
+                col, get_castling_moves=False)]
 
         for move in moves:
             if type(move) == Move:
                 if move.position_to == self.position:
-                    return True
-            if type(move) == PromotionMove:
-                if move.position == self.position:
                     return True
         else:
             return False
@@ -65,6 +62,10 @@ class Square:
         Ensures that only one version of the piece exists
         """
         p = self._piece
+        if not p:
+            print(f"This This - {self.position}")
+            self._gamestate.print()
+            raise Exception("Can't pop_piece if there isn't one")
         p.position = (None, None)
         self._piece = None
         return p
