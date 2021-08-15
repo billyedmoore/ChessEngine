@@ -63,7 +63,6 @@ class Square:
         """
         p = self._piece
         if not p:
-            print(f"This This - {self.position}")
             self._gamestate.print()
             raise Exception("Can't pop_piece if there isn't one")
         p.position = (None, None)

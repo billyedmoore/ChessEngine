@@ -100,9 +100,17 @@ class Piece:
                 pos = (self.position[0]+(i*direction[0]),
                        self.position[1]+(i*direction[1]))
                 if game_state.square_exists(pos):
-                    diag_moves.append(Move(game_state, self.position, pos))
                     if not game_state.square_is_empty(pos):
-                        break
+                        piece = game_state.get_square(pos).get_piece()
+                        if piece.colour == self.colour.lower():
+                            break
+                        else:
+                            diag_moves.append(
+                                Move(game_state, self.position, pos))
+                            break
+                    else:
+                        diag_moves.append(Move(game_state, self.position, pos))
+
         return diag_moves
 
     # awful name but I got nothing better
@@ -112,18 +120,17 @@ class Piece:
         check. This is to be used when a player is in check and as a result is
         obliged to play a move out of check if one exists
         """
-        print(moves)
+
         legal_moves = []
         for move in moves:
-            if not game_state.get_square(move.position_from).get_piece():
-                if move.position_from != self.position:
-                    print(move.position_from)
-                continue
+            mv_copy = move.clone()
             gs_copy = game_state.clone()
-            gs_copy.make_move(move, check_legality=False)
+            mv_copy.gamestate = gs_copy
+            gs_copy.make_move(mv_copy, check_legality=False)
 
             if not gs_copy.check(self.colour):
                 legal_moves.append(move)
+            gs_copy.undo_move()
 
         return legal_moves
 
@@ -162,6 +169,13 @@ class Pawn(Piece):
                        (info["direction"]))
             if game_state.square_exists(move_to):
                 legal_moves.append(Move(game_state, self.position, move_to))
+
+            capture_positions = [(self.position[0]+1, self.position[1]+info["direction"]),
+                                 (self.position[0]-1, self.position[1]+info["direction"])]
+            for position in capture_positions:
+                if game_state.square_exists(position) and not game_state.square_is_empty(position):
+                    legal_moves.append(
+                        Move(game_state, self.position, position))
         else:
             legal_moves.append(
                 PromotionMove(game_state, self.position))
@@ -269,7 +283,7 @@ class King(Piece):
                     legal_moves.append(CastlingMove(
                         game_state, self.position, side))
 
-            return legal_moves
+        return legal_moves
 
 
 class Rook(Piece):

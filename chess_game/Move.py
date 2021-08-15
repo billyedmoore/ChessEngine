@@ -10,14 +10,11 @@ class BaseMove:
         position_to - Were the piece will be moved to
     """
 
-    # set to the piece captured in this move if one is to allow move to be undone
-    _captured_pieces = []
-
     def __init__(self, gamestate):
         self._gamestate = gamestate
 
     def clone(self):
-        return Move(self._gamestate, self.position_from, self.position_to, promotion=self.promotion, promote_to=self.promote_to)
+        pass
 
     def is_valid_position(self, position: tuple):
         for i in position:
@@ -29,13 +26,13 @@ class BaseMove:
     def perform(self):
         pass
 
-    @ property
-    def captured(self):
-        return self._captured
+    @property
+    def gamestate(self):
+        return self._gamestate
 
-    @ captured.setter
-    def captured(self, piece):
-        self._captured = piece
+    @gamestate.setter
+    def gamestate(self, gamestate):
+        self._gamestate = gamestate
 
     @ property
     def promotion(self):
@@ -55,15 +52,10 @@ class BaseMove:
         returns a Move formulated from an algebraic notation
         """
         # This is the worst function I have ever written
-        print("from_algebraic_notation")
         # print(algebraic_move)
         piece_letters = ["R", "N", "P", "B", "K", "Q"]
         file_values = ["a", "b", "c", "d", "e", "f", "g", "h"]
         rank_values = ["8", "7", "6", "5", "4", "3", "2", "1"]
-
-        # TODO remove only for troubleshooting
-        if not gamestate:
-            print(f"{gamestate} - {colour_moving} - {algebraic_move}")
 
         def get_king(colour):
             king = [p for p in gamestate.get_pieces_by_colour(colour)
@@ -82,7 +74,6 @@ class BaseMove:
         # ignore captures and checks as not relevant or helpful
         algebraic_move = "".join(
             [char for char in algebraic_move if char != "+" and char != "x"])
-        print(algebraic_move)
 
         # if no piece is stated then a pawn is moving
         if algebraic_move[0] in file_values:
@@ -105,13 +96,36 @@ class BaseMove:
             elif len(possible_moves) == 0:
                 return None
             else:
-                if algebraic_move[-3] in rank_values:
-                    rank_values.index[algebraic_move[-3]]
-                elif algebraic_move[-3] in file_values:
-                    pass
+                splice = algebraic_move[1:-2]
+                if len(splice) == 2:
+                    possible_moves == [
+                        m for m in possible_moves if m.position_from == coord_to_pos(splice)]
+                elif len(splice) == 1:
+                    possible_moves_cpy = possible_moves
+                    possible_moves = []
+                    if splice in file_values:
+                        for m in possible_moves_cpy:
+                            if m.position_from[0] == file_values.index(splice):
+                                possible_moves.append(m)
+
+                        if len(possible_moves) != 1:
+                            return None
+                        else:
+                            return possible_moves[0]
+                    if splice in rank_values:
+                        for m in possible_moves_cpy:
+                            if m.position_from[1] == rank_values.index(splice):
+                                possible_moves.append(m)
+                        if len(possible_moves) != 1:
+                            return None
+                        else:
+                            return possible_moves[0]
+                else:
+                    return None
+
                 print(
-                    "More than one move is possible and I cba to deal with that bs right now")
-                print(possible_moves)
+                    f"move = {algebraic_move}| splice = {algebraic_move[1:-2]}")
+
         elif algebraic_move.strip() == "O-O":
             king = get_king(colour_moving)
             return CastlingMove(gamestate, king.position, "k")
@@ -123,10 +137,25 @@ class BaseMove:
 
 
 class Move(BaseMove):
+
+    # set to the piece captured in this move if one is to allow move to be undone
+    _captured_piece = None
+
     def __init__(self, gamestate, from_pos, to_pos):
         super().__init__(gamestate)
         self._position_from = from_pos
         self._position_to = to_pos
+
+    def clone(self):
+        return Move(self.gamestate, self.position_from, self.position_to)
+
+    @ property
+    def captured(self):
+        return self._captured_piece
+
+    @ captured.setter
+    def captured(self, piece):
+        self._captured_piece = piece
 
     def is_legal_move(self):
         square_from = self._gamestate.get_square(self.position_from)
@@ -138,11 +167,11 @@ class Move(BaseMove):
 
     def perform(self):
         square_from = self._gamestate.get_square(self.position_from)
-        piece = square_from.pop_piece()
         square_to = self._gamestate.get_square(self.position_to)
+        piece = square_from.pop_piece()
         if not self._gamestate.square_is_empty(square_to.position):
             captured_piece = square_to.pop_piece()
-            self._captured_pieces.append(captured_piece)
+            self._captured_piece = (captured_piece)
         piece.make_move(square_to.position)
         square_to.set_piece(piece)
 
@@ -173,6 +202,9 @@ class CastlingMove(BaseMove):
         super().__init__(gamestate)
         self.king_position = king_pos
         self.side = side
+
+    def clone(self):
+        return CastlingMove(self.gamestate, self.king_position, self.side)
 
     def is_legal_move(self):
         # print(self.king_position)
@@ -235,6 +267,9 @@ class PromotionMove(BaseMove):
         self._promote_from = type(
             gamestate.get_square(self._position_from)._piece)
         self._promote_to = promote_to
+
+    def clone(self):
+        return PromotionMove(self.gamestate, self.position, self.promote_to)
 
     def is_legal_moves(self):
         square = self._gamestate.get_square(self.position)

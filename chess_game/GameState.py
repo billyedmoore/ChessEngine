@@ -104,11 +104,15 @@ class GameState:
         """
         opposition_colour = ["B", "W"][["W", "B"].index(colour.upper())]
         # TODO: handle no opposition_king on board
-        opposition_king = [
-            s._piece for s in self._squares
-            if s._piece and s._piece.letter.lower() == "k"
-            and s._piece.colour.upper() == colour.upper()][0]
-        opposition_king_pos = opposition_king.position
+        try:
+            opposition_king = [
+                s._piece for s in self._squares
+                if s._piece and s._piece.letter.lower() == "k"
+                and s._piece.colour.upper() == colour.upper()][0]
+            opposition_king_pos = opposition_king.position
+        except IndexError:
+            # self.print()
+            return True
 
         # psuedolegal so it doesn't have to call game_state.check and get stuck
         # in infinite loop
@@ -157,7 +161,12 @@ class GameState:
         pieces_of_colour = self.get_pieces_by_colour(colour)
         legal_moves = []
         for piece in pieces_of_colour:
-            legal_moves.extend(piece.get_pseudolegal_moves(self))
+            try:
+                legal_moves.extend(piece.get_pseudolegal_moves(self))
+            except TypeError as te:
+                print(piece.get_pseudolegal_moves(self))
+                print(piece.letter)
+                raise te
         return legal_moves
 
     def _load_fen(self, fen_string):
@@ -249,6 +258,8 @@ class GameState:
         """
         Play a move on the GameState
         """
+        if move.gamestate != self:
+            raise Exception(f"cant make move with diffrent gamestate")
         if check_legality and not move.is_legal_move():
             raise Exception(
                 f"Invalid Move {(move.position_from,move.position_to)}")
