@@ -16,6 +16,17 @@ class Game:
         self._white_player = white_player
         self._black_player = black_player
 
+    @property
+    def gamestate(self):
+        return self._gamestate
+
+    @gamestate.setter
+    def gamestate(self, gamestate):
+        if type(gamestate) == GameState:
+            self._gamestate = gamestate
+        else:
+            raise TypeError("Not of type GameState")
+
     def print(self):
         self._gamestate.print()
 

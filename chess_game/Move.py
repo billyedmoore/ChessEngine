@@ -52,7 +52,6 @@ class BaseMove:
         returns a Move formulated from an algebraic notation
         """
         # This is the worst function I have ever written
-        # print(algebraic_move)
         piece_letters = ["R", "N", "P", "B", "K", "Q"]
         file_values = ["a", "b", "c", "d", "e", "f", "g", "h"]
         rank_values = ["8", "7", "6", "5", "4", "3", "2", "1"]
@@ -96,6 +95,8 @@ class BaseMove:
             elif len(possible_moves) == 0:
                 return None
             else:
+                print(
+                    [f"{m.position_from} -> {m.position_to}" for m in possible_moves])
                 splice = algebraic_move[1:-2]
                 if len(splice) == 2:
                     possible_moves == [
@@ -237,6 +238,13 @@ class CastlingMove(BaseMove):
         king_from_square.pop_piece()
         rook_from_square.pop_piece()
 
+    @property
+    def position_from(self):
+        """
+        legacy
+        """
+        return self._king_pos
+
     @ property
     def king_position(self):
         return self._king_pos
@@ -288,6 +296,13 @@ class PromotionMove(BaseMove):
     @ property
     def promote_to(self):
         return self._promote_to
+
+    @property
+    def position_from(self):
+        """
+        legacy
+        """
+        return self.position
 
     @ property
     def position(self):

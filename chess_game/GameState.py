@@ -164,8 +164,6 @@ class GameState:
             try:
                 legal_moves.extend(piece.get_pseudolegal_moves(self))
             except TypeError as te:
-                print(piece.get_pseudolegal_moves(self))
-                print(piece.letter)
                 raise te
         return legal_moves
 
@@ -178,6 +176,7 @@ class GameState:
             fen_string: a string that follows FEN notation (https://www.chessprogramming.org/Forsyth-Edwards_Notation)
         """
         letter_lookup = self.piece_letters
+        self._squares = []
 
         # R1k5/7R/2Q3K1/8/8/6rq/PPPPPPPP/1NB2BNr b - - 0 1
         ranks = fen_string.split(" ")[0].split("/")
@@ -270,6 +269,10 @@ class GameState:
             "W", "B"].index(self._player_to_play)]
 
     def undo_move(self):
+
+        # TODO: move.unperform() method to handle this like move.perform is
+        #        handled
+
         # TODO: handle no moves having been made yet
         move = self._moves.pop()
         square_from = self.get_square(move.position_from)
