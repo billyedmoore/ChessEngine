@@ -167,15 +167,16 @@ class Pawn(Piece):
         if self.position[1] != info["end_row"]:
             move_to = (self.position[0], self.position[1] +
                        (info["direction"]))
-            if game_state.square_exists(move_to):
+            if game_state.square_exists(move_to) and game_state.square_is_empty(move_to):
                 legal_moves.append(Move(game_state, self.position, move_to))
 
             capture_positions = [(self.position[0]+1, self.position[1]+info["direction"]),
                                  (self.position[0]-1, self.position[1]+info["direction"])]
             for position in capture_positions:
                 if game_state.square_exists(position) and not game_state.square_is_empty(position):
-                    legal_moves.append(
-                        Move(game_state, self.position, position))
+                    if not game_state.get_square(position).get_piece().colour.lower() == self.colour.lower():
+                        legal_moves.append(
+                            Move(game_state, self.position, position))
         else:
             legal_moves.append(
                 PromotionMove(game_state, self.position))
@@ -185,8 +186,9 @@ class Pawn(Piece):
             directions = [+1, -1]
             for direction in directions:
                 if not game_state.square_is_empty((self.position[0]+direction, self.position[1])):
-                    legal_moves.append(
-                        Move(game_state, self.position, (self.position[0]+direction, self.position[1])))
+                    if not game_state.get_square((self.position[0]+direction, self.position[1])).get_piece().colour.lower() == self.colour.lower():
+                        legal_moves.append(
+                            Move(game_state, self.position, (self.position[0]+direction, self.position[1])))
 
         return legal_moves
 
@@ -326,8 +328,11 @@ class Knight(Piece):
         for change in possible_changes:
             possible_move_to = (
                 self.position[0]+change[0], self.position[1]+change[1])
-            if game_state.square_exists(possible_move_to):
-                legal_moves.append(
-                    Move(game_state, self.position, possible_move_to))
+            exists = game_state.square_exists(possible_move_to)
+            if exists:
+                is_empty = game_state.square_is_empty(possible_move_to)
+                if (is_empty or game_state.get_square(possible_move_to).get_piece().colour.lower() != self.colour.lower()):
+                    legal_moves.append(
+                        Move(game_state, self.position, possible_move_to))
 
         return legal_moves
