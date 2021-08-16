@@ -1,5 +1,3 @@
-
-
 class BaseMove:
     """
     A class to represent a move.
@@ -24,6 +22,17 @@ class BaseMove:
                 return True
 
     def perform(self):
+        """
+        Perform the move on the 'gamestate'
+        """
+        pass
+
+    def unperform(self):
+        if not self._gamestate.get_move_stack().peek() == self:
+            raise Exception("Can only unperform the last move.")
+        self._unperform()
+
+    def _unperform(self):
         pass
 
     @property
@@ -138,7 +147,6 @@ class BaseMove:
 
 
 class Move(BaseMove):
-
     # set to the piece captured in this move if one is to allow move to be undone
     _captured_piece = None
 
@@ -176,6 +184,15 @@ class Move(BaseMove):
         piece.make_move(square_to.position)
         square_to.set_piece(piece)
 
+    def _unperform(self):
+        square_from = self.get_square(self.position_from)
+        square_to = self.get_square(self.position_to)
+        piece = square_to.pop_piece()
+
+        if self.captured:
+            square_to.set_piece(self.captured)
+        square_from.set_piece(piece)
+
     @ property
     def position_from(self):
         return self._position_from
@@ -203,6 +220,14 @@ class CastlingMove(BaseMove):
         super().__init__(gamestate)
         self.king_position = king_pos
         self.side = side
+        directions = {"q": -1, "k": 1}
+        rook_positions = {
+            "q": (0, self._king_pos[1]), "k": (7, self._king_pos[1])}
+        self._king_to_pos = ((self.king_position[0] +
+                              2*directions[self.side.lower()]), self.king_position[1])
+        self._rook_to_pos = ((self.king_position[0] +
+                              directions[self.side.lower()]), self.king_position[1])
+        self._rook_from_pos = rook_positions[self.side.lower()]
 
     def clone(self):
         return CastlingMove(self.gamestate, self.king_position, self.side)
@@ -216,27 +241,32 @@ class CastlingMove(BaseMove):
         return ((square.position, self.side) in formated_moves)
 
     def perform(self):
-        rook_positions = {
-            "q": (0, self._king_pos[1]), "k": (7, self._king_pos[1])}
-        directions = {"q": -1, "k": 1}
         king_from_square = self._gamestate.get_square(self._king_pos)
+        rook_from_square = self._gamestate.get_square(self._rook_from_pos)
         king = king_from_square.get_piece()
-        rook_from_square = self._gamestate.get_square(
-            rook_positions[self.side.lower()])
         rook = rook_from_square.get_piece()
 
-        king_to_pos = ((self.king_position[0] +
-                        2*directions[self.side.lower()]), self.king_position[1])
-        rook_to_pos = ((self.king_position[0] +
-                        directions[self.side.lower()]), self.king_position[1])
-
-        king_to_square = self._gamestate.get_square(king_to_pos)
+        king_to_square = self._gamestate.get_square(self._king_to_pos)
         king_to_square.set_piece(king)
-        rook_to_square = self._gamestate.get_square(rook_to_pos)
+        rook_to_square = self._gamestate.get_square(self._rook_to_pos)
         rook_to_square.set_piece(rook)
 
         king_from_square.pop_piece()
         rook_from_square.pop_piece()
+
+    def _unperform(self):
+        king_to_square = self._gamestate.get_square(self._king_to_pos)
+        rook_to_square = self._gamestate.get_square(self._rook_to_pos)
+        king = king_to_square.get_piece()
+        rook = rook_to_square.get_piece()
+
+        king_from_square = self._gamestate.get_square(self.king_pos)
+        king_from_square.set_piece(king)
+        rook_from_square = self._gamestate.get_square(self.rook_from_pos)
+        rook_from_square.set_piece(rook)
+
+        king_to_square.pop_piece()
+        rook_to_square.pop_piece()
 
     @property
     def position_from(self):
@@ -291,6 +321,13 @@ class PromotionMove(BaseMove):
         piece = square.pop_piece()
         piece_to_type = self.promote_to
         square.set_piece(piece_to_type(
+            square.position, piece.colour, move_count=piece.move_count))
+
+    def _unperform(self):
+        square = self._gamestate.get_square(self.position)
+        piece = square.pop_piece()
+        piece_from_type = self.promote_from
+        square.set_piece(piece_from_type(
             square.position, piece.colour, move_count=piece.move_count))
 
     @ property

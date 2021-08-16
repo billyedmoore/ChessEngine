@@ -307,6 +307,9 @@ class GameState:
         return(self._squares[position[0] +
                              (position[1] * 8)])
 
+    def get_move_stack(self):
+        return self._moves
+
     @staticmethod
     def square_exists(position: tuple):
         """
