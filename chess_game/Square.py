@@ -1,4 +1,3 @@
-from .Move import Move, PromotionMove
 
 
 class Square:
@@ -34,7 +33,7 @@ class Square:
                 col, get_castling_moves=False)]
 
         for move in moves:
-            if type(move) == Move:
+            if move.normal:
                 if move.position_to == self.position:
                     return True
         else:

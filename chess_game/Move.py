@@ -1,3 +1,6 @@
+from . import GameState
+
+
 class BaseMove:
     """
     A class to represent a move.
@@ -20,6 +23,9 @@ class BaseMove:
                 return False
             if i in range(0, 8):
                 return True
+
+    def print(self):
+        pass
 
     def perform(self):
         """
@@ -89,7 +95,15 @@ class BaseMove:
 
         # denotes a promotion move
         if "=" in algebraic_move:
-            pass
+            pos = algebraic_move[1:3]
+            print(algebraic_move[1:3])
+            print(pos)
+            coord = coord_to_pos(pos)
+            promote_to = algebraic_move[-1]
+            promote_to_class = GameState.GameState.piece_letters[promote_to.lower(
+            )]
+            return PromotionMove(gamestate, coord, promote_to=promote_to_class)
+
         elif algebraic_move[0] in piece_letters:
             coord = coord_to_pos(algebraic_move[-2:])
             if not coord:
@@ -154,6 +168,9 @@ class Move(BaseMove):
         super().__init__(gamestate)
         self._position_from = from_pos
         self._position_to = to_pos
+
+    def print(self):
+        print(f"Move - {self.position_from} -> {self.position_to}")
 
     def clone(self):
         return Move(self.gamestate, self.position_from, self.position_to)
@@ -240,6 +257,9 @@ class CastlingMove(BaseMove):
                           for m in [p for p in piece.get_legal_moves(self._gamestate) if p.castling]]
         return ((square.position, self.side) in formated_moves)
 
+    def print(self):
+        print(f"CastlingMoves - {self.king_position} {self.side}")
+
     def perform(self):
         king_from_square = self._gamestate.get_square(self._king_pos)
         rook_from_square = self._gamestate.get_square(self._rook_from_pos)
@@ -303,18 +323,22 @@ class PromotionMove(BaseMove):
         super().__init__(gamestate)
         self._position = position
         self._promote_from = type(
-            gamestate.get_square(self._position_from)._piece)
+            gamestate.get_square(self._position)._piece)
         self._promote_to = promote_to
 
     def clone(self):
         return PromotionMove(self.gamestate, self.position, self.promote_to)
 
-    def is_legal_moves(self):
+    def is_legal_move(self):
         square = self._gamestate.get_square(self.position)
         piece = square.get_piece()
         formated_moves = [(m.position)
                           for m in [p for p in piece.get_legal_moves(self._gamestate) if p.promotion]]
         return ((square.position) in formated_moves)
+
+    def print(self):
+        print(
+            f"PromotionMove - promote on {self.position} to {self.promote_to}")
 
     def perform(self):
         square = self._gamestate.get_square(self.position)
@@ -343,7 +367,7 @@ class PromotionMove(BaseMove):
 
     @ property
     def position(self):
-        return self.position
+        return self._position
 
     @ position.setter
     def position(self, pos):

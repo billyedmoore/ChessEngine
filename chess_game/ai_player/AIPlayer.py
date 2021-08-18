@@ -9,7 +9,6 @@ class AIPlayer(Player.BasePlayer):
     def get_next_move(self):
         best_value = (+10000000 if self.colour.lower() == "w" else -10000000)
         best_move = None
-        print(self.gamestate.player_to_play)
         for move in self.gamestate.get_legal_moves(self.colour):
             gs_cpy = self.gamestate.clone()
             move_cpy = move.clone()
@@ -26,8 +25,7 @@ class AIPlayer(Player.BasePlayer):
                 if best_value < value:
                     best_value = value
                     best_move = move
-        print(
-            f"selected move {best_move} {best_move.position_from} {best_move.position_to}")
+        best_move.print()
         return best_move
 
     @ staticmethod
@@ -51,8 +49,6 @@ class AIPlayer(Player.BasePlayer):
             for move in gamestate.get_legal_moves(gamestate.player_to_play):
                 gs = gamestate.clone()
                 move.gamestate = gs
-                if not move.is_legal_move():
-                    continue
                 gs.make_move(move)
                 value = max(value, AIPlayer.alphabeta(
                     gs, depth-1, alpha, beta, False))
@@ -65,8 +61,6 @@ class AIPlayer(Player.BasePlayer):
             for move in gamestate.get_legal_moves(gamestate.player_to_play):
                 gs = gamestate.clone()
                 move.gamestate = gs
-                if not move.is_legal_move():
-                    continue
                 gs.make_move(move)
                 value = min(value, AIPlayer.alphabeta(
                     gs, depth-1, alpha, beta, True))

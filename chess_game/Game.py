@@ -17,6 +17,20 @@ class Game:
         self._black_player = black_player
 
     @property
+    def is_game_over(self):
+        white_checkmate = self.gamestate.checkmate("w")
+        black_checkmate = self.gamestate.checkmate("b")
+        if white_checkmate and not black_checkmate:
+            return "w"
+        elif black_checkmate and not white_checkmate:
+            return "b"
+        elif white_checkmate and black_checkmate:
+            return "d"
+        else:
+            return ""
+
+
+    @property
     def gamestate(self):
         return self._gamestate
 
@@ -31,6 +45,16 @@ class Game:
         self._gamestate.print()
 
     def play_next_move(self):
+        if self.is_game_over:
+            if self.is_game_over == "w":
+                print("White wins")
+                return 
+            elif self.is_game_over == "b":
+                print("Black wins")
+                return
+            elif self.is_game_over == "d":
+                print("Draw")
+                return
         player = self._white_player if self._gamestate.player_to_play.lower(
         ) == "w" else self._black_player
         move = player.get_next_move()

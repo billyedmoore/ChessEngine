@@ -185,8 +185,9 @@ class Pawn(Piece):
         if self.position[1] == info["start_row"]+(2*info["direction"]):
             directions = [+1, -1]
             for direction in directions:
-                if not game_state.square_is_empty((self.position[0]+direction, self.position[1])):
-                    if not game_state.get_square((self.position[0]+direction, self.position[1])).get_piece().colour.lower() == self.colour.lower():
+                potential_pos = (self.position[0]+direction, self.position[1])
+                if not game_state.square_is_empty(potential_pos) and game_state.square_exists(potential_pos):
+                    if not game_state.get_square(potential_pos).get_piece().colour.lower() == self.colour.lower():
                         legal_moves.append(
                             Move(game_state, self.position, (self.position[0]+direction, self.position[1])))
 

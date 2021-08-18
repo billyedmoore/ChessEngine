@@ -1,6 +1,5 @@
 from .Square import Square
 from .Pieces import Rook, Pawn, Bishop, King, Knight, Queen
-from .Move import PromotionMove
 
 
 class MoveStack:
@@ -147,9 +146,6 @@ class GameState:
         pieces_of_colour = self.get_pieces_by_colour(colour)
         legal_moves = []
         for piece in pieces_of_colour:
-            for m in piece.get_legal_moves(self):
-                if not m.is_legal_move():
-                    print(m.position_from, m.position_to, piece.letter)
             legal_moves.extend(piece.get_legal_moves(self))
         return legal_moves
 
