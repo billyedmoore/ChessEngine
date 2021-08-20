@@ -125,12 +125,12 @@ class Piece:
         for move in moves:
             mv_copy = move.clone()
             gs_copy = game_state.clone()
-            mv_copy.gamestate = gs_copy
+            mv_copy._gamestate = gs_copy
             gs_copy.make_move(mv_copy, check_legality=False)
 
             if not gs_copy.check(self.colour):
                 legal_moves.append(move)
-            gs_copy.undo_move()
+            # gs_copy.undo_move()
 
         return legal_moves
 

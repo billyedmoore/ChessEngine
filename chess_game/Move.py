@@ -34,7 +34,7 @@ class BaseMove:
         pass
 
     def unperform(self):
-        if not self._gamestate.get_move_stack().peek() == self:
+        if not self._gamestate._moves.peek() == self:
             raise Exception("Can only unperform the last move.")
         self._unperform()
 
@@ -118,8 +118,6 @@ class BaseMove:
             elif len(possible_moves) == 0:
                 return None
             else:
-                print(
-                    [f"{m.position_from} -> {m.position_to}" for m in possible_moves])
                 splice = algebraic_move[1:-2]
                 if len(splice) == 2:
                     possible_moves == [
