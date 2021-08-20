@@ -1,9 +1,7 @@
 # Chess Engine
 
-+ [Word project](https://edukedstac-my.sharepoint.com/:w:/g/personal/202046_kedst_ac_uk/ETgx7Q98QgRFrNzpiTgMbdcBvnGcpOCUa3xIE303dv97SA)
+Project for AQA A-Level computer science non exam assessment. Chess game written
+in python with an alpha-beta pruning computer player and a frontend written in
+python. See project write up below.
 
-
-##### Make git work like local at college
-```
-Set-Alias -Name git -Value C:\Users\202046\Downloads\PortableGit\bin\git.exe
-```
+- [Word project](https://edukedstac-my.sharepoint.com/:w:/g/personal/202046_kedst_ac_uk/ETgx7Q98QgRFrNzpiTgMbdcBvnGcpOCUa3xIE303dv97SA)
