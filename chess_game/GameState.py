@@ -29,6 +29,8 @@ class MoveStack:
         Returns and removes the top item from the stack
         """
         length = len(self._moves)
+        if length == 0:
+            return None
         value = self._moves[length - 1]
         del self._moves[length - 1]
         return value
@@ -37,6 +39,8 @@ class MoveStack:
         """
         Returns the top item from the stack without removing it from the stack
         """
+        if len(self._moves) == 0:
+            return None
         return self._moves[len(self._moves) - 1]
 
 
@@ -268,22 +272,8 @@ class GameState:
             "W", "B"].index(self._player_to_play)]
 
     def undo_move(self):
-
-        # TODO: move.unperform() method to handle this like move.perform is
-        #        handled
-
-        # TODO: handle no moves having been made yet
         move = self._moves.pop()
-        square_from = self.get_square(move.position_from)
-        square_to = self.get_square(move.position_to)
-        piece = square_to.pop_piece()  # not pop incase move fails
-        if move.promotion:
-            square_from.set_piece(move.promote_from(
-                square_from.position, piece.colour, move_count=piece.move_count))
-        else:
-            if move.captured:
-                square_to.set_piece(move.captured)
-            square_from.set_piece(piece)
+        move.unperform()
 
     def get_pieces_by_colour(self, colour: str):
         """

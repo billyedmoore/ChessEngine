@@ -34,7 +34,7 @@ class BaseMove:
         pass
 
     def unperform(self):
-        if not self._gamestate.get_move_stack().peek() == self:
+        if not self._gamestate._moves.peek() == self:
             raise Exception("Can only unperform the last move.")
         self._unperform()
 
