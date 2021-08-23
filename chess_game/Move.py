@@ -10,6 +10,8 @@ class BaseMove:
         position_from - The current location of the piece
         position_to - Were the piece will be moved to
     """
+    file_values = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    rank_values = ["8", "7", "6", "5", "4", "3", "2", "1"]
 
     def __init__(self, gamestate):
         self._gamestate = gamestate
@@ -62,25 +64,28 @@ class BaseMove:
         return (type(self) == CastlingMove)
 
     @staticmethod
+    def coord_to_pos(coord):
+        try:
+            return (BaseMove.file_values.index(coord[0]), BaseMove.rank_values.index(coord[1]))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def pos_to_coord(pos):
+        return f"{BaseMove.file_values[pos[0]]}{BaseMove.rank_values[pos[1]]}"
+
+    @staticmethod
     def from_algebraic_notation(gamestate, colour_moving, algebraic_move):
         """
         returns a Move formulated from an algebraic notation
         """
         # This is the worst function I have ever written
         piece_letters = ["R", "N", "P", "B", "K", "Q"]
-        file_values = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        rank_values = ["8", "7", "6", "5", "4", "3", "2", "1"]
 
         def get_king(colour):
             king = [p for p in gamestate.get_pieces_by_colour(colour)
                     if p.letter.upper() == "K"][0]
             return king
-
-        def coord_to_pos(coord):
-            try:
-                return (file_values.index(coord[0]), rank_values.index(coord[1]))
-            except ValueError:
-                return None
 
         if not algebraic_move:
             return None
@@ -90,7 +95,7 @@ class BaseMove:
             [char for char in algebraic_move if char != "+" and char != "x"])
 
         # if no piece is stated then a pawn is moving
-        if algebraic_move[0] in file_values:
+        if algebraic_move[0] in BaseMove.file_values:
             algebraic_move = "P" + algebraic_move
 
         # denotes a promotion move
@@ -98,14 +103,14 @@ class BaseMove:
             pos = algebraic_move[1:3]
             print(algebraic_move[1:3])
             print(pos)
-            coord = coord_to_pos(pos)
+            coord = BaseMove.coord_to_pos(pos)
             promote_to = algebraic_move[-1]
             promote_to_class = GameState.GameState.piece_letters[promote_to.lower(
             )]
             return PromotionMove(gamestate, coord, promote_to=promote_to_class)
 
         elif algebraic_move[0] in piece_letters:
-            coord = coord_to_pos(algebraic_move[-2:])
+            coord = BaseMove.coord_to_pos(algebraic_move[-2:])
             if not coord:
                 return None
             possible_moves = [
@@ -121,13 +126,13 @@ class BaseMove:
                 splice = algebraic_move[1:-2]
                 if len(splice) == 2:
                     possible_moves == [
-                        m for m in possible_moves if m.position_from == coord_to_pos(splice)]
+                        m for m in possible_moves if m.position_from == BaseMove.coord_to_pos(splice)]
                 elif len(splice) == 1:
                     possible_moves_cpy = possible_moves
                     possible_moves = []
-                    if splice in file_values:
+                    if splice in BaseMove.file_values:
                         for m in possible_moves_cpy:
-                            if m.position_from[0] == file_values.index(splice):
+                            if m.position_from[0] == BaseMove.file_values.index(splice):
                                 possible_moves.append(m)
 
                         if len(possible_moves) != 1:
@@ -166,6 +171,8 @@ class Move(BaseMove):
         super().__init__(gamestate)
         self._position_from = from_pos
         self._position_to = to_pos
+        self.moving_piece = self._gamestate.get_square(
+            self.position_from)._piece
 
     def print(self):
         print(f"Move - {self.position_from} -> {self.position_to}")
@@ -225,6 +232,10 @@ class Move(BaseMove):
     def position_to(self, pos):
         if self.is_valid_position(pos):
             self._position_to = pos
+
+    def to_algebraic_notation(self):
+        piece = self.moving_piece
+        return f"{piece.letter}{BaseMove.pos_to_coord(self.position_from)}{BaseMove.pos_to_coord(self.position_to)}"
 
 
 class CastlingMove(BaseMove):
@@ -311,6 +322,12 @@ class CastlingMove(BaseMove):
         if side.lower() in ["k", "q"]:
             self._side = side
 
+    def to_algebraic_notation(self):
+        if self.side.lower() == "q":
+            return "O-O-O"
+        elif self.side.lower() == "k":
+            return "O-O"
+
 
 class PromotionMove(BaseMove):
     _promote_to = None
@@ -371,3 +388,11 @@ class PromotionMove(BaseMove):
     def position(self, pos):
         if self.is_valid_position(pos):
             self._position = pos
+
+    def to_algebraic_notation(self):
+        if self.promote_to:
+            return f"{self.pos_to_coord(self.position)}={promote_to.letter.upper()}"
+        else:
+            # assumes promotion to a Queen because you have to promote to
+            # something to denote a promotion move
+            return f"{self.pos_to_coord(self.position)}=Q"

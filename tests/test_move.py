@@ -36,3 +36,51 @@ class TestMoveMethods(unittest.TestCase):
         mv = Move.Move.from_algebraic_notation(gs, "b", "Rad7")
         self.assertTrue(mv and mv.normal and mv.position_from ==
                         (0, 1) and mv.position_to == (3, 1))
+
+    def test_to_algebraic_notation_promotion(self):
+        """
+        Tests PromotionMove.to_algebraic_notation()
+        """
+        gs = GameState.GameState(
+            fen_string="1PPPk3/r2Q3r/8/8/8/8/6PP/RNB1KBNR w KQ - 0 1")
+        mvs = [mv.to_algebraic_notation()
+               for mv in gs.get_legal_moves("w") if mv.promotion]
+        self.assertEqual(['b8=Q', 'c8=Q', 'd8=Q'], mvs)
+
+    def test_to_algebraic_notation_castling_kingside(self):
+        """
+        Tests CastlingMove.to_algebraic_notation() for kingside moves
+        """
+        gs = GameState.GameState(
+            fen_string="r3kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1")
+        mv = Move.CastlingMove(gs, (4, 7), "k")
+        self.assertEqual(mv.to_algebraic_notation(), "O-O")
+
+    def test_to_algebraic_notation_castling_queenside(self):
+        """
+        Tests CastlingMove.to_algebraic_notation() for queenside moves
+        """
+        gs = GameState.GameState(
+            fen_string="r3kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1")
+        mv = Move.CastlingMove(gs, (4, 7), "k")
+        gs.make_move(mv)
+        mv = Move.CastlingMove(gs, (4, 0), "q")
+        self.assertEqual(mv.to_algebraic_notation(), "O-O-O")
+
+    def test_to_algebraic_notation_normal(self):
+        """
+        Tests Move.to_algebraic_notation() for normal_moves
+        """
+        def move_to_str(mv):
+            if not mv.normal:
+                return ""
+            else:
+                return f"{mv.position_from} -> {mv.position_to}"
+
+        gs = GameState.GameState()
+        mvs = [mv.to_algebraic_notation() for mv in gs.get_legal_moves("w")]
+        mvs = [Move.Move.from_algebraic_notation(gs, "w", mv) for mv in mvs]
+        formated_mvs = [move_to_str(mv) for mv in mvs]
+        other_formated_mvs = [move_to_str(mv)
+                              for mv in gs.get_legal_moves("w")]
+        self.assertTrue(formated_mvs == other_formated_mvs)
