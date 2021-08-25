@@ -1,5 +1,6 @@
 import pygame
-from Button import Button
+from .Button import Button
+from .GameScreen import GameScreen
 from pygame.locals import *
 
 
@@ -10,13 +11,15 @@ class MenuScreen(pygame.Surface):
         self.surface = app.screen
         button_width = w/2
         self.buttons = [Button(self, w/2, h/8, w/4, h/4,
-                               text="Single Player"),
+                               text="Single Player",
+                               on_click=lambda: app.start_game(GameScreen(app, w, h))),
                         Button(self, w/2, h/8, w/4, 2*(h/4),
-                               text="Local Multiplayer")]
+                               text="Local Multiplayer",
+                               on_click=lambda: app.start_game(GameScreen(app, w, h)))]
 
     def draw(self):
         self.surface.blit(self, (0, 0))
-        self.fill((34, 40, 49))
+        self.fill((20, 20, 20))
         [button.draw() for button in self.buttons]
 
     def handle_event(self, event):
