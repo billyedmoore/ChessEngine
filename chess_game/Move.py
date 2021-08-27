@@ -116,17 +116,23 @@ class BaseMove:
                 if type(m) == Move and
                 m.position_to == coord
                 and gamestate.get_square(m.position_from).get_piece().letter.upper() == algebraic_move[0]]
-            if len(possible_moves) == 1:
-                return possible_moves[0]
-            elif len(possible_moves) == 0:
-                return None
-            else:
+            if len(possible_moves) >= 1:
                 splice = algebraic_move[1:-2]
+
                 if len(splice) == 2:
-                    possible_moves == [
+                    possible_moves = [
                         m for m in possible_moves if m.position_from == BaseMove.coord_to_pos(splice)]
+                    if len(possible_moves) != 1:
+                        return None
+                    else:
+                        return possible_moves[0]
+                elif len(splice) == 0:
+                    if len(possible_moves) != 1:
+                        return None
+                    else:
+                        return possible_moves[0]
                 elif len(splice) == 1:
-                    possible_moves_cpy = possible_moves
+                    possible_moves_cpy = list(possible_moves)
                     possible_moves = []
                     if splice in BaseMove.file_values:
                         for m in possible_moves_cpy:

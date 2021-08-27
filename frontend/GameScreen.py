@@ -106,16 +106,20 @@ class Board(pygame.Surface):
                         mv = Move.Move(self.game.gamestate,
                                        self.from_pos, coord)
                         self.game.make_move(mv.to_algebraic_notation())
+                        # TODO handle castling moves and promotion moves
                     self.down = False
                     self.from_pos = None
 
 
 class MoveTable(pygame.Surface):
-    def __init__(self, app, parent_surface, x, y, w, h, game):
+    def __init__(self, app, parent_surface, x, y, w, h, game,
+                 white_colour=(90, 90, 90), black_colour=(40, 40, 40)):
         pygame.Surface.__init__((self), size=(
             w, h))
         self.app = app
         self.game = game
+        self.black_colour = black_colour
+        self.white_colour = white_colour
         self.w = w
         self.h = h
         self.x = x
@@ -129,7 +133,10 @@ class MoveTable(pygame.Surface):
         self.white_moves = self.game.get_previous_moves("w")[-10:]
         self.black_moves = self.game.get_previous_moves("b")[-10:]
         self.parent_surface.blit(self, (self.x, self.y))
-        self.fill((90, 90, 90))
+        pygame.draw.rect(self, self.white_colour, (0, 0, self.w/2, self.h))
+        pygame.draw.rect(self, self.black_colour,
+                         (self.w/2, 0, self.w/2, self.h))
+        # self.fill((90, 90, 90))
         text_height = 30
         for move in range(len(self.white_moves)):
             text = self.app.font.render(
@@ -152,10 +159,11 @@ class GameScreen(pygame.Surface):
     def __init__(self, app, w, h):
         pygame.Surface.__init__((self), size=(w, h))
         self.surface = app.screen  # surface refers to parent surface
-        remaining_width = h-h/4
+        remaining_width = (h-h/4)
+        menu_screen_x = ((w-remaining_width)-w/2)
         self.board = Board(app, self, remaining_width, h/20, w/2)
         self.move_table = MoveTable(
-            app, self, remaining_width/20, h/20, (remaining_width/20)*18, w/2,  self.board.game)
+            app, self, menu_screen_x, h/20, remaining_width-(1.5*(menu_screen_x)), w/2,  self.board.game)
         self.fill((20, 20, 20))
 
     def draw(self):

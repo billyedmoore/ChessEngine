@@ -7,6 +7,7 @@ class Piece(pygame.sprite.Sprite):
     def __init__(self, number, pos, square_width, piece_letter, piece_colour):
         self.number = number
         self.pos = pos
+        self.in_position = True
         pygame.sprite.Sprite.__init__(self)
         self.letter = piece_letter.lower() if piece_colour.lower(
         ) == "b" else piece_letter.upper()
@@ -36,5 +37,9 @@ class Piece(pygame.sprite.Sprite):
         self._pos == pos
 
     def update(self):
-        self.rect = (self.pos[1]*self.square_width,
-                     self.pos[0]*self.square_width, self.square_width, self.square_width)
+        if self.in_position:
+            self.rect = (self.pos[1]*self.square_width,
+                         self.pos[0]*self.square_width, self.square_width, self.square_width)
+        else:
+            self.rect = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[
+                         0], self.square_width, self.square_width)
