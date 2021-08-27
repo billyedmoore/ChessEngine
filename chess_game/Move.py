@@ -101,8 +101,6 @@ class BaseMove:
         # denotes a promotion move
         if "=" in algebraic_move:
             pos = algebraic_move[1:3]
-            print(algebraic_move[1:3])
-            print(pos)
             coord = BaseMove.coord_to_pos(pos)
             promote_to = algebraic_move[-1]
             promote_to_class = GameState.GameState.piece_letters[promote_to.lower(
@@ -235,7 +233,7 @@ class Move(BaseMove):
 
     def to_algebraic_notation(self):
         piece = self.moving_piece
-        return f"{piece.letter}{BaseMove.pos_to_coord(self.position_from)}{BaseMove.pos_to_coord(self.position_to)}"
+        return f"{piece.letter.upper()}{BaseMove.pos_to_coord(self.position_from)}{BaseMove.pos_to_coord(self.position_to)}"
 
 
 class CastlingMove(BaseMove):

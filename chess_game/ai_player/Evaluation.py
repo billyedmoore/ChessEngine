@@ -3,9 +3,9 @@
 class Evaluation:
     # Straight up stole these tables from sunfish
     # sunfish - https://github.com/thomasahle/sunfish/blob/master/sunfish.py
-    piece_weights = {"P": 100, "N": 200,
-                     "B": 320, "R": 479,
-                     "Q": 929, "K": 60000}
+    piece_weights = {"P": 200, "N": 400,
+                     "B": 640, "R": 958,
+                     "Q": 1858, "K": 120000}
     tables = {
         "P": ((0,   0,   0,   0,   0,   0,   0,   0),
               (78,  83,  86,  73, 102,  82,  85,  90),

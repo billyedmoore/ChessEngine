@@ -9,10 +9,16 @@ class MoveStack:
     """
     _moves = []
 
+    def __init__(self):
+        self._moves = []
+
     def clone(self):
         cpy = MoveStack()
-        cpy._moves = self._moves
+        cpy._moves = list(self._moves)
         return cpy
+
+    def get_moves(self):
+        return self._moves
 
     @property
     def ply_count(self):
@@ -180,7 +186,7 @@ class GameState:
         """
         letter_lookup = self.piece_letters
         self._squares = []
-
+        number = 1
         # R1k5/7R/2Q3K1/8/8/6rq/PPPPPPPP/1NB2BNr b - - 0 1
         ranks = fen_string.split(" ")[0].split("/")
 
@@ -205,7 +211,8 @@ class GameState:
                         color = "w"
 
                     squares[x].set_piece(
-                        letter_lookup[ranks[rank_index][chars_evaluated].lower()](squares[x].position, color))
+                        letter_lookup[ranks[rank_index][chars_evaluated].lower()](number, squares[x].position, color))
+                    number += 1
                     chars_evaluated += 1
 
             # Adds the values from this rank to the _squares list
@@ -268,6 +275,7 @@ class GameState:
         move.perform()
 
         self._moves.push(move)
+        print(f"adding {move.to_algebraic_notation}")
         self._player_to_play = ["B", "W"][[
             "W", "B"].index(self._player_to_play)]
 

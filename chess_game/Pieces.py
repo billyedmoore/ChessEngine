@@ -16,13 +16,14 @@ class Piece:
     _move_count = 0
     _letter = "F"
 
-    def __init__(self, position, color, move_count=0):
+    def __init__(self, number, position, color, move_count=0):
+        self.number = number
         self._move_count = move_count
         self._position = position
         self._colour = color
 
     def clone(self):
-        return type(self)(self.position, self.colour, move_count=self.move_count)
+        return type(self)(self.number, self.position, self.colour, move_count=self.move_count)
 
     @property
     def move_count(self) -> int:
@@ -146,8 +147,8 @@ class Pawn(Piece):
     _letter = "P"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color, move_count=0):
-        super().__init__(position, color, move_count=move_count)
+    def __init__(self, number, position, color, move_count=0):
+        super().__init__(number, position, color, move_count=move_count)
 
     def _get_legal_moves(self, game_state, get_castling_moves=True):
         legal_moves = []
@@ -202,8 +203,8 @@ class Bishop(Piece):
     _letter = "B"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color, move_count=0):
-        super().__init__(position, color, move_count=move_count)
+    def __init__(self, number, position, color, move_count=0):
+        super().__init__(number, position, color, move_count=move_count)
 
     def _get_legal_moves(self, game_state, get_castling_moves=True):
         directions = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
@@ -219,8 +220,8 @@ class Queen(Piece):
     _letter = "Q"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color, move_count=0):
-        super().__init__(position, color, move_count=move_count)
+    def __init__(self, number, position, color, move_count=0):
+        super().__init__(number, position, color, move_count=move_count)
 
     def _get_legal_moves(self, game_state, get_castling_moves=True):
         directions = [(1, -1), (1, 0), (1, 1), (0, -1),
@@ -237,8 +238,8 @@ class King(Piece):
     _letter = "K"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color, move_count=0):
-        super().__init__(position, color, move_count=move_count)
+    def __init__(self, number, position, color, move_count=0):
+        super().__init__(number, position, color, move_count=move_count)
 
     def _get_legal_moves(self, game_state, get_castling_moves=True):
         directions = [(1, -1), (1, 0), (1, 1), (0, -1),
@@ -297,8 +298,8 @@ class Rook(Piece):
     _letter = "R"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color, move_count=0):
-        super().__init__(position, color, move_count=move_count)
+    def __init__(self, number, position, color, move_count=0):
+        super().__init__(number, position, color, move_count=move_count)
 
     def _get_legal_moves(self, game_state, get_castling_moves=True):
         directions = [(0, -1), (0, 1), (1, 0), (-1, 0)]
@@ -315,8 +316,8 @@ class Knight(Piece):
     _letter = "N"
 
     # Don't like that you have to pass the game state numerous times
-    def __init__(self, position, color, move_count=0):
-        super().__init__(position, color, move_count=move_count)
+    def __init__(self, number, position, color, move_count=0):
+        super().__init__(number, position, color, move_count=move_count)
 
     def _get_legal_moves(self, game_state, get_castling_moves=True):
         legal_moves = []

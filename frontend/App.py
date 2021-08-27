@@ -20,6 +20,7 @@ class App:
         self.current_screen = MenuScreen.MenuScreen(
             self, self.screen_res[0], self.screen_res[1])
         self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont("freemono", 20)
         self.last_tick = pygame.time.get_ticks()
 
         while True:
@@ -40,6 +41,7 @@ class App:
 
     def tick(self):
         self.ttime = self.clock.tick()
+        self.current_screen.tick()
 
     def start_game(self, game_screen):
         self.in_game = True

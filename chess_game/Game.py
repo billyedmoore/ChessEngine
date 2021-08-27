@@ -1,4 +1,5 @@
 from .GameState import GameState
+from .Move import Move
 
 
 class Game:
@@ -6,13 +7,15 @@ class Game:
     Class for a game of chess
     """
     _gamestate = None  # of type GameState
-    _white_player = None  # of type Player
-    _black_player = None  # of type Player
+    _white_player = None  # of type Player or None
+    _black_player = None  # of type Player or None
 
     def __init__(self, white_player, black_player, fen_string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
         self._gamestate = GameState(fen_string=fen_string)
-        white_player.gamestate = self._gamestate
-        black_player.gamestate = self._gamestate
+        if white_player:
+            white_player.gamestate = self._gamestate
+        if black_player:
+            black_player.gamestate = self._gamestate
         self._white_player = white_player
         self._black_player = black_player
 
@@ -27,6 +30,9 @@ class Game:
             "d" - nobody wins
             ""  - game is not over
         """
+        # Other ways that the game can be over:
+        # Threefold repetition - position repeated three times in a game
+        # 50 move rule - no captures or pawn moves made in last 50 moves
         white_checkmate = self.gamestate.checkmate("w")
         black_checkmate = self.gamestate.checkmate("b")
         if white_checkmate and not black_checkmate:
@@ -60,6 +66,20 @@ class Game:
         move_strings = [move.to_algebraic_notation() for move in moves]
         return move_strings
 
+    def get_previous_moves(self, colour: str):
+        """
+        Returns a list of previous moves in algebraic notation for a given colour.
+
+        Parameters
+            str colour - value from the set {"w","W","b","B"}
+        """
+        moves = self.gamestate.get_move_stack().get_moves()
+        if colour.lower() == "w":
+            return [moves[i].to_algebraic_notation() for i in range(len(moves)) if i % 2 == 0]
+
+        elif colour.lower() == "b":
+            return [moves[i].to_algebraic_notation() for i in range(len(moves)) if i % 2 == 1]
+
     def get_one_colour_board(self, colour):
         """
         Returns a repersentaion of the chess board only contating pieces of a 
@@ -69,28 +89,25 @@ class Game:
             str colour - value from the set {"w","W","b","B"}
         """
         board = [square.get_piece() for square in self.gamestate._squares]
-        board = [piece for piece in board if not piece or piece.colour.upper()
-                 == colour.upper()]
-        board = [piece.letter if piece else "" for piece in board]
+        board = [(piece.letter, piece.number) if piece and piece.colour.upper(
+        ) == colour.upper() else "" for piece in board]
         board = [board[x:x+8] for x in range(0, len(board), 8)]
-        print(board)
         return board
 
     def print(self):
         self._gamestate.print()
 
-    def play_next_move(self):
-        if self.is_game_over:
-            if self.is_game_over == "w":
-                print("White wins")
-                return
-            elif self.is_game_over == "b":
-                print("Black wins")
-                return
-            elif self.is_game_over == "d":
-                print("Draw")
-                return
-        player = self._white_player if self._gamestate.player_to_play.lower(
-        ) == "w" else self._black_player
-        move = player.get_next_move()
-        self._gamestate.make_move(move)
+    def tick(self):
+        # if no player is set moves will be made by the frontend
+        players = {"w": self._white_player, "b": self._black_player}
+        player_to_play = players[self._gamestate.player_to_play.lower()]
+        if player_to_play:
+            move = player_to_play.get_next_move()
+            self._gamestate.make_move(move)
+
+    def make_move(self, algebraic_move):
+        colour_playing = self.gamestate.player_to_play
+        move = Move.from_algebraic_notation(
+            self.gamestate, colour_playing, algebraic_move)
+        if move:
+            self.gamestate.make_move(move)

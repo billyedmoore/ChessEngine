@@ -17,11 +17,13 @@ class MenuScreen(pygame.Surface):
                                text="Local Multiplayer",
                                on_click=lambda: app.start_game(GameScreen(app, w, h)))]
 
+    def tick(self):
+        pass
+
     def draw(self):
         self.surface.blit(self, (0, 0))
         self.fill((20, 20, 20))
         [button.draw() for button in self.buttons]
 
     def handle_event(self, event):
-        if event.type == MOUSEBUTTONDOWN:
-            [button.handle_event(event) for button in self.buttons]
+        [button.handle_event(event) for button in self.buttons]
