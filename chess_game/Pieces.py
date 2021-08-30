@@ -1,4 +1,4 @@
-from .Move import Move, PromotionMove, CastlingMove
+from . import Move
 
 
 class Piece:
@@ -114,10 +114,11 @@ class Piece:
                             break
                         else:
                             diag_moves.append(
-                                Move(game_state, self.position, pos))
+                                Move.Move(game_state, self.position, pos))
                             break
                     else:
-                        diag_moves.append(Move(game_state, self.position, pos))
+                        diag_moves.append(
+                            Move.Move(game_state, self.position, pos))
 
         return diag_moves
 
@@ -170,7 +171,8 @@ class Pawn(Piece):
             move_to = (self.position[0], self.position[1] +
                        (2*info["direction"]))
             if game_state.square_exists(move_to):
-                legal_moves.append(Move(game_state, self.position, move_to))
+                legal_moves.append(
+                    Move.Move(game_state, self.position, move_to))
 
         if self.position[1] != (info["end_row"]):
             move_to = (self.position[0], self.position[1] +
@@ -178,9 +180,9 @@ class Pawn(Piece):
             if game_state.square_exists(move_to) and game_state.square_is_empty(move_to):
                 if move_to[1] != info["end_row"]:
                     legal_moves.append(
-                        Move(game_state, self.position, move_to))
+                        Move.Move(game_state, self.position, move_to))
                 else:
-                    legal_moves.append(PromotionMove(
+                    legal_moves.append(Move.PromotionMove(
                         game_state, self.position, move_to))
 
             capture_positions = [(self.position[0]+1, self.position[1]+info["direction"]),
@@ -190,15 +192,12 @@ class Pawn(Piece):
                     if not game_state.get_square(position).get_piece().colour.lower() == self.colour.lower():
                         if position[1] != info["end_row"]:
                             legal_moves.append(
-                                Move(game_state, self.position, position))
+                                Move.Move(game_state, self.position, position))
                         else:
-                            legal_moves.append(PromotionMove(
+                            legal_moves.append(Move.PromotionMove(
                                 game_state, self.position, position))
         else:
-            move_to = (self.position[0], self.position[1] +
-                       (info["direction"]))
-            legal_moves.append(
-                PromotionMove(game_state, self.position))
+            print("We should never get here")
 
         # en-passant
         if self.position[1] == info["start_row"]+(2*info["direction"]):
@@ -208,7 +207,7 @@ class Pawn(Piece):
                 if not game_state.square_is_empty(potential_pos) and game_state.square_exists(potential_pos):
                     if not game_state.get_square(potential_pos).get_piece().colour.lower() == self.colour.lower():
                         legal_moves.append(
-                            Move(game_state, self.position, (self.position[0]+direction, self.position[1])))
+                            Move.Move(game_state, self.position, (self.position[0]+direction, self.position[1])))
 
         return legal_moves
 
@@ -270,7 +269,7 @@ class King(Piece):
             y = king_row[self.colour.lower()]
             castling_positions = {(2, y): "q", (6, y): "k"}
             possible_castling_moves = [
-                Move(game_state, self.position, castle_pos) for castle_pos in castling_positions.keys()]
+                Move.Move(game_state, self.position, castle_pos) for castle_pos in castling_positions.keys()]
 
             for move in possible_castling_moves:
                 # check wether a check can be made
@@ -302,7 +301,7 @@ class King(Piece):
                         can_castle = False
 
                 if can_castle:
-                    legal_moves.append(CastlingMove(
+                    legal_moves.append(Move.CastlingMove(
                         game_state, self.position, side))
 
         return legal_moves
@@ -353,6 +352,6 @@ class Knight(Piece):
                 is_empty = game_state.square_is_empty(possible_move_to)
                 if (is_empty or game_state.get_square(possible_move_to).get_piece().colour.lower() != self.colour.lower()):
                     legal_moves.append(
-                        Move(game_state, self.position, possible_move_to))
+                        Move.Move(game_state, self.position, possible_move_to))
 
         return legal_moves

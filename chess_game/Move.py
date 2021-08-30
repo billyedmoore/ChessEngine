@@ -1,5 +1,4 @@
 from . import GameState
-from . import Pieces
 
 
 class BaseMove:
@@ -351,7 +350,7 @@ class PromotionMove(BaseMove):
         self._promote_to = promote_to
 
     def clone(self):
-        return PromotionMove(self.gamestate, self.position, self.promote_to)
+        return PromotionMove(self.gamestate, self.position_from, self.position_to, promote_to=self.promote_to)
 
     def is_legal_move(self):
         square = self._gamestate.get_square(self.position)
@@ -380,10 +379,10 @@ class PromotionMove(BaseMove):
     def _unperform(self):
         square_from = self._gamestate.get_square(self.position_from)
         square_to = self._gamestate.get_square(self.position_to)
-        piece_to = square_to.pop_piece()
+        piece_from = square_to.pop_piece()  # new piece
         if self.captured:
             square_to.set_piece(self.captured)
-        piece_to = Pieces.Pawn(
+        piece_to = self._promote_from(
             square_from.position, piece_to.colour, move_count=piece_to.move_count)
         piece_to.forget_move()
         square_to.set_piece(piece_to)
@@ -402,33 +401,26 @@ class PromotionMove(BaseMove):
 
     @property
     def position_from(self):
-        return self._position_from
+        return self._from_pos
 
     @position_from.setter
     def position_from(self, pos):
         if self.is_valid_position(pos):
-            self._position_from = pos
+            self._from_pos
 
     @property
     def position_to(self):
-        return self._position_to
+        return self._to_pos
 
     @position_to.setter
     def position_to(self, pos):
         if self.is_valid_position(pos):
-            self._position_to = pos
-
-    @property
-    def position_from(self):
-        """
-        legacy
-        """
-        return self.position
+            self._to_pos = pos
 
     def to_algebraic_notation(self):
         if self.promote_to:
-            return f"{self.pos_to_coord(self.position)}={promote_to.letter.upper()}"
+            return f"P{self.pos_to_coord(self.position_from)}{self.pos_to_coord(self.position_to)}={promote_to.letter.upper()}"
         else:
             # assumes promotion to a Queen because you have to promote to
             # something to denote a promotion move
-            return f"{self.pos_to_coord(self.position)}=Q"
+            return f"P{self.pos_to_coord(self.position_from)}{self.pos_to_coord(self.position_to)}=Q"

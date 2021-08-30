@@ -42,10 +42,10 @@ class TestMoveMethods(unittest.TestCase):
         Tests PromotionMove.to_algebraic_notation()
         """
         gs = GameState.GameState(
-            fen_string="1PPPk3/r2Q3r/8/8/8/8/6PP/RNB1KBNR w KQ - 0 1")
+            fen_string="7k/PP1PP3/8/8/8/8/1P3PPP/RNBQKBNR w KQ - 0 1")
         mvs = [mv.to_algebraic_notation()
                for mv in gs.get_legal_moves("w") if mv.promotion]
-        self.assertEqual(['b8=Q', 'c8=Q', 'd8=Q'], mvs)
+        self.assertEqual(['Pa7a8=Q', 'Pb7b8=Q', 'Pd7d8=Q', 'Pe7e8=Q'], mvs)
 
     def test_to_algebraic_notation_castling_kingside(self):
         """
