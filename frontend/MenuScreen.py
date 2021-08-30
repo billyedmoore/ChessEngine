@@ -1,6 +1,7 @@
 import pygame
 from .Button import Button
 from .GameScreen import GameScreen
+from chess_game.ai_player.AIPlayer import AIPlayer
 from pygame.locals import *
 
 
@@ -12,7 +13,7 @@ class MenuScreen(pygame.Surface):
         button_width = w/2
         self.buttons = [Button(self, w/2, h/8, w/4, h/4,
                                text="Single Player",
-                               on_click=lambda: app.start_game(GameScreen(app, w, h))),
+                               on_click=lambda: app.start_game(GameScreen(app, w, h,black_player=AIPlayer("b")))),
                         Button(self, w/2, h/8, w/4, 2*(h/4),
                                text="Local Multiplayer",
                                on_click=lambda: app.start_game(GameScreen(app, w, h)))]

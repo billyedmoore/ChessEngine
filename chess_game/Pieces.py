@@ -73,6 +73,13 @@ class Piece:
         self.position = position_to
         self._move_count += 1
 
+    def forget_move(self):
+        if self._move_count >= 2:
+            self._move_count = self._move_count - 1
+        elif self._move_count == 1:
+            self._move_count = self._move_count - 1
+            self._moved = False
+
     def get_legal_moves(self, game_state, get_castling_moves=True):
         moves = self._get_legal_moves(game_state)
         if game_state.check(self.colour):
@@ -165,20 +172,31 @@ class Pawn(Piece):
             if game_state.square_exists(move_to):
                 legal_moves.append(Move(game_state, self.position, move_to))
 
-        if self.position[1] != info["end_row"]:
+        if self.position[1] != (info["end_row"]):
             move_to = (self.position[0], self.position[1] +
                        (info["direction"]))
             if game_state.square_exists(move_to) and game_state.square_is_empty(move_to):
-                legal_moves.append(Move(game_state, self.position, move_to))
+                if move_to[1] != info["end_row"]:
+                    legal_moves.append(
+                        Move(game_state, self.position, move_to))
+                else:
+                    legal_moves.append(PromotionMove(
+                        game_state, self.position, move_to))
 
             capture_positions = [(self.position[0]+1, self.position[1]+info["direction"]),
                                  (self.position[0]-1, self.position[1]+info["direction"])]
             for position in capture_positions:
                 if game_state.square_exists(position) and not game_state.square_is_empty(position):
                     if not game_state.get_square(position).get_piece().colour.lower() == self.colour.lower():
-                        legal_moves.append(
-                            Move(game_state, self.position, position))
+                        if position[1] != info["end_row"]:
+                            legal_moves.append(
+                                Move(game_state, self.position, position))
+                        else:
+                            legal_moves.append(PromotionMove(
+                                game_state, self.position, position))
         else:
+            move_to = (self.position[0], self.position[1] +
+                       (info["direction"]))
             legal_moves.append(
                 PromotionMove(game_state, self.position))
 

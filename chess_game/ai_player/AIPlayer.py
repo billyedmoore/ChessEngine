@@ -15,7 +15,7 @@ class AIPlayer(Player.BasePlayer):
             move_cpy.gamestate = gs_cpy
             gs_cpy.make_move(move_cpy)
 
-            value = self.alphabeta(gs_cpy, 2, -10000000,
+            value = self.alphabeta(gs_cpy, 1, -10000000,
                                    +10000000, (True if self.colour.lower() == "w" else False))
             if self.colour.lower() == "w":
                 if best_value > value:

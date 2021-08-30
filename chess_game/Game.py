@@ -48,6 +48,10 @@ class Game:
     def gamestate(self):
         return self._gamestate
 
+    @property
+    def player_to_play(self):
+        return self.gamestate.player_to_play
+
     @gamestate.setter
     def gamestate(self, gamestate: GameState):
         if type(gamestate) == GameState:
@@ -111,3 +115,20 @@ class Game:
             self.gamestate, colour_playing, algebraic_move)
         if move:
             self.gamestate.make_move(move)
+
+    def get_algebraic_notation(self, pos_from, pos_to):
+        special_moves = {"b": {((4, 0), (7, 0)): "O-O", ((4, 0), (0, 0)): "O-O-O"},
+                         "w": {((4, 7), (7, 7)): "O-O", ((4, 7), (0, 7)): "O-O-O"}}
+        special_moves = special_moves[self.player_to_play.lower()]
+        try:
+            move = special_moves[(pos_from, pos_to)]
+            return move
+        except KeyError as e:
+            pass
+        piece = self._gamestate.get_square(pos_from).get_piece()
+        if piece:
+            piece_letter = piece.letter
+        else:
+            return None
+        move = Move(self.gamestate, pos_from, pos_to)
+        return move.to_algebraic_notation()

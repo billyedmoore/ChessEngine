@@ -1,5 +1,7 @@
 import pygame
+import threading
 from pygame.locals import MOUSEBUTTONDOWN, MOUSEBUTTONUP
+
 from .Piece import Piece
 from chess_game import Game, Move
 
@@ -78,17 +80,21 @@ class Board(pygame.Surface):
     def tick(self):
         # TODO: make this async so that it dont block the drawing
         if not self.game.is_game_over:
-            self.game.tick()
+            thread = threading.Thread(target=self.game.tick)
+            thread.start()
         self.update_sprites()
         self.draw()
+        if not self.game.is_game_over:
+            thread.join()
 
     def draw(self):
         self.parent_surface.blit(self, (self.x, self.y))
         self.draw_squares()
         self.white_pieces.update()
         self.black_pieces.update()
-        self.white_pieces.draw(self)
-        self.black_pieces.draw(self)
+        if not self.game.is_game_over:
+            self.white_pieces.draw(self)
+            self.black_pieces.draw(self)
         # self.fill(self.white_colour)
 
     def handle_event(self, event):
@@ -102,10 +108,12 @@ class Board(pygame.Surface):
                     self.from_pos = coord
                 elif event.type == MOUSEBUTTONUP:
                     if self.down and self.from_pos:
-                        print(f"{self.from_pos} -> {coord}")
-                        mv = Move.Move(self.game.gamestate,
-                                       self.from_pos, coord)
-                        self.game.make_move(mv.to_algebraic_notation())
+                        # print(f"{self.from_pos} -> {coord}")
+                        algebraic = self.game.get_algebraic_notation(
+                            self.from_pos, coord)
+                        print(algebraic)
+                        self.game.make_move(algebraic)
+
                         # TODO handle castling moves and promotion moves
                     self.down = False
                     self.from_pos = None
@@ -156,12 +164,13 @@ class GameScreen(pygame.Surface):
     Page to display and play a chess game with a specified set of options.
     """
 
-    def __init__(self, app, w, h):
+    def __init__(self, app, w, h, white_player=None, black_player=None):
         pygame.Surface.__init__((self), size=(w, h))
         self.surface = app.screen  # surface refers to parent surface
         remaining_width = (h-h/4)
         menu_screen_x = ((w-remaining_width)-w/2)
-        self.board = Board(app, self, remaining_width, h/20, w/2)
+        self.board = Board(app, self, remaining_width, h/20, w/2,
+                           white_player=white_player, black_player=black_player)
         self.move_table = MoveTable(
             app, self, menu_screen_x, h/20, remaining_width-(1.5*(menu_screen_x)), w/2,  self.board.game)
         self.fill((20, 20, 20))

@@ -1,4 +1,5 @@
 from . import GameState
+from . import Pieces
 
 
 class BaseMove:
@@ -214,9 +215,9 @@ class Move(BaseMove):
         square_from = self.get_square(self.position_from)
         square_to = self.get_square(self.position_to)
         piece = square_to.pop_piece()
-
         if self.captured:
             square_to.set_piece(self.captured)
+        piece.forget_move()
         square_from.set_piece(piece)
 
     @ property
@@ -239,6 +240,8 @@ class Move(BaseMove):
 
     def to_algebraic_notation(self):
         piece = self.moving_piece
+        if not piece:
+            return None
         return f"{piece.letter.upper()}{BaseMove.pos_to_coord(self.position_from)}{BaseMove.pos_to_coord(self.position_to)}"
 
 
@@ -336,13 +339,15 @@ class CastlingMove(BaseMove):
 class PromotionMove(BaseMove):
     _promote_to = None
     _promote_from = None
+    _captured_piece = None
     _position = (-1, -1)
 
-    def __init__(self, gamestate, position, promote_to=None):
+    def __init__(self, gamestate, from_pos, to_pos, promote_to=None):
         super().__init__(gamestate)
-        self._position = position
+        self._from_pos = from_pos
+        self._to_pos = to_pos
         self._promote_from = type(
-            gamestate.get_square(self._position)._piece)
+            gamestate.get_square(self._from_pos)._piece)
         self._promote_to = promote_to
 
     def clone(self):
@@ -360,22 +365,58 @@ class PromotionMove(BaseMove):
             f"PromotionMove - promote on {self.position} to {self.promote_to}")
 
     def perform(self):
-        square = self._gamestate.get_square(self.position)
-        piece = square.pop_piece()
+        square_from = self._gamestate.get_square(self.position_from)
+        square_to = self._gamestate.get_square(self.position_to)
+        piece_from = square_from.pop_piece()
+        if not self._gamestate.square_is_empty(square_to.position):
+            captured_piece = square_to.pop_piece()
+            self._captured_piece = (captured_piece)
         piece_to_type = self.promote_to
-        square.set_piece(piece_to_type(
-            square.position, piece.colour, move_count=piece.move_count))
+        piece_to = piece_to_type(
+            square_to.position, piece_from.colour, move_count=piece_from.move_count)
+        piece_to.make_move(square_to.position)
+        square_to.set_piece(piece_to)
 
     def _unperform(self):
-        square = self._gamestate.get_square(self.position)
-        piece = square.pop_piece()
-        piece_from_type = self.promote_from
-        square.set_piece(piece_from_type(
-            square.position, piece.colour, move_count=piece.move_count))
+        square_from = self._gamestate.get_square(self.position_from)
+        square_to = self._gamestate.get_square(self.position_to)
+        piece_to = square_to.pop_piece()
+        if self.captured:
+            square_to.set_piece(self.captured)
+        piece_to = Pieces.Pawn(
+            square_from.position, piece_to.colour, move_count=piece_to.move_count)
+        piece_to.forget_move()
+        square_to.set_piece(piece_to)
 
     @ property
+    def captured(self):
+        return self._captured_piece
+
+    @ captured.setter
+    def captured(self, piece):
+        self._captured_piece = piece
+
+    @property
     def promote_to(self):
         return self._promote_to
+
+    @property
+    def position_from(self):
+        return self._position_from
+
+    @position_from.setter
+    def position_from(self, pos):
+        if self.is_valid_position(pos):
+            self._position_from = pos
+
+    @property
+    def position_to(self):
+        return self._position_to
+
+    @position_to.setter
+    def position_to(self, pos):
+        if self.is_valid_position(pos):
+            self._position_to = pos
 
     @property
     def position_from(self):
@@ -383,15 +424,6 @@ class PromotionMove(BaseMove):
         legacy
         """
         return self.position
-
-    @ property
-    def position(self):
-        return self._position
-
-    @ position.setter
-    def position(self, pos):
-        if self.is_valid_position(pos):
-            self._position = pos
 
     def to_algebraic_notation(self):
         if self.promote_to:
