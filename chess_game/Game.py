@@ -1,5 +1,5 @@
 from .GameState import GameState
-from .Move import Move
+from .Move import Move, PromotionMove
 
 
 class Game:
@@ -110,15 +110,23 @@ class Game:
             self._gamestate.make_move(move)
 
     def make_move(self, algebraic_move):
+        
         colour_playing = self.gamestate.player_to_play
         move = Move.from_algebraic_notation(
             self.gamestate, colour_playing, algebraic_move)
+        print(algebraic_move, " -> ", move)
         if move:
             self.gamestate.make_move(move)
+        self.gamestate.print()
 
     def get_algebraic_notation(self, pos_from, pos_to):
         special_moves = {"b": {((4, 0), (7, 0)): "O-O", ((4, 0), (0, 0)): "O-O-O"},
                          "w": {((4, 7), (7, 7)): "O-O", ((4, 7), (0, 7)): "O-O-O"}}
+
+        colour_info = {
+            "B": {"start_row": 1, "end_row": 7, "direction": +1},
+            "W": {"start_row": 6, "end_row": 0, "direction": -1}}
+        info = colour_info[self.player_to_play.upper()]
         special_moves = special_moves[self.player_to_play.lower()]
         try:
             move = special_moves[(pos_from, pos_to)]
@@ -130,5 +138,10 @@ class Game:
             piece_letter = piece.letter
         else:
             return None
-        move = Move(self.gamestate, pos_from, pos_to)
+
+        if pos_to[1] == info["end_row"]:
+            move = PromotionMove(self.gamestate, pos_from, pos_to)
+        else:
+            move = Move(self.gamestate, pos_from, pos_to)
+
         return move.to_algebraic_notation()

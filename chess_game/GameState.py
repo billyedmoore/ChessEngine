@@ -275,7 +275,6 @@ class GameState:
         move.perform()
 
         self._moves.push(move)
-        print(f"adding {move.to_algebraic_notation}")
         self._player_to_play = ["B", "W"][[
             "W", "B"].index(self._player_to_play)]
 

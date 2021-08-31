@@ -82,6 +82,8 @@ class BaseMove:
         # This is the worst function I have ever written
         piece_letters = ["R", "N", "P", "B", "K", "Q"]
 
+        print("Opened the function")
+
         def get_king(colour):
             king = [p for p in gamestate.get_pieces_by_colour(colour)
                     if p.letter.upper() == "K"][0]
@@ -100,25 +102,28 @@ class BaseMove:
 
         # denotes a promotion move
         if "=" in algebraic_move:
-            pos = algebraic_move[1:3]
-            coord = BaseMove.coord_to_pos(pos)
-            promote_to = algebraic_move[-1]
-            promote_to_class = GameState.GameState.piece_letters[promote_to.lower(
+            # pos = algebraic_move[-2:]
+            # coord = BaseMove.coord_to_pos(pos)
+            # splice = algebraic_move[1:-2]
+            promote_to_letter = algebraic_move[-1]
+            promote_to = GameState.GameState.piece_letters[promote_to_letter.lower(
             )]
-            return PromotionMove(gamestate, coord, promote_to=promote_to_class)
+            algebraic_move = algebraic_move.split("=")[0]
+            # return PromotionMove(gamestate, coord, promote_to=promote_to_class)
 
-        elif algebraic_move[0] in piece_letters:
+        if algebraic_move[0] in piece_letters:
+            print("P is first letter")
             coord = BaseMove.coord_to_pos(algebraic_move[-2:])
+            print("position_to is ", coord)
             if not coord:
                 return None
             possible_moves = [
                 m for m in gamestate.get_legal_moves(colour_moving)
-                if type(m) == Move and
+                if (type(m) == Move or type(m) == PromotionMove) and
                 m.position_to == coord
                 and gamestate.get_square(m.position_from).get_piece().letter.upper() == algebraic_move[0]]
             if len(possible_moves) >= 1:
                 splice = algebraic_move[1:-2]
-
                 if len(splice) == 2:
                     possible_moves = [
                         m for m in possible_moves if m.position_from == BaseMove.coord_to_pos(splice)]
@@ -153,9 +158,6 @@ class BaseMove:
                             return possible_moves[0]
                 else:
                     return None
-
-                print(
-                    f"move = {algebraic_move}| splice = {algebraic_move[1:-2]}")
 
         elif algebraic_move.strip() == "O-O":
             king = get_king(colour_moving)
@@ -303,7 +305,7 @@ class CastlingMove(BaseMove):
         king_to_square.pop_piece()
         rook_to_square.pop_piece()
 
-    @property
+    @ property
     def position_from(self):
         """
         legacy
@@ -353,11 +355,13 @@ class PromotionMove(BaseMove):
         return PromotionMove(self.gamestate, self.position_from, self.position_to, promote_to=self.promote_to)
 
     def is_legal_move(self):
-        square = self._gamestate.get_square(self.position)
-        piece = square.get_piece()
-        formated_moves = [(m.position)
-                          for m in [p for p in piece.get_legal_moves(self._gamestate) if p.promotion]]
-        return ((square.position) in formated_moves)
+        piece = self.gamestate.get_square(self.position_from).get_piece()
+        if not piece:
+            return False
+        formated_moves = [(m.position_from, m.position_to)
+                          for m in self.gamestate.get_legal_moves(piece.colour)]
+        print(formated_moves)
+        return ((self.position_from, self.position_to) in formated_moves)
 
     def print(self):
         print(
@@ -370,9 +374,12 @@ class PromotionMove(BaseMove):
         if not self._gamestate.square_is_empty(square_to.position):
             captured_piece = square_to.pop_piece()
             self._captured_piece = (captured_piece)
-        piece_to_type = self.promote_to
+        if self.promote_to:
+            piece_to_type = self.promote_to
+        else:
+            piece_to_type = self.gamestate.piece_letters["q"]
         piece_to = piece_to_type(
-            square_to.position, piece_from.colour, move_count=piece_from.move_count)
+            piece_from.number, square_to.position, piece_from.colour, move_count=piece_from.move_count)
         piece_to.make_move(square_to.position)
         square_to.set_piece(piece_to)
 
@@ -395,24 +402,24 @@ class PromotionMove(BaseMove):
     def captured(self, piece):
         self._captured_piece = piece
 
-    @property
+    @ property
     def promote_to(self):
         return self._promote_to
 
-    @property
+    @ property
     def position_from(self):
         return self._from_pos
 
-    @position_from.setter
+    @ position_from.setter
     def position_from(self, pos):
         if self.is_valid_position(pos):
             self._from_pos
 
-    @property
+    @ property
     def position_to(self):
         return self._to_pos
 
-    @position_to.setter
+    @ position_to.setter
     def position_to(self, pos):
         if self.is_valid_position(pos):
             self._to_pos = pos

@@ -9,23 +9,10 @@ class Piece(pygame.sprite.Sprite):
         self.pos = pos
         self.in_position = True
         pygame.sprite.Sprite.__init__(self)
-        self.letter = piece_letter.lower() if piece_colour.lower(
+        self._piece_letter = piece_letter.lower() if piece_colour.lower(
         ) == "b" else piece_letter.upper()
         self.colour = piece_colour.lower()
         self.square_width = square_width
-        self.rect = (pos[1]*square_width, pos[0] *
-                     square_width, square_width, square_width)
-        self.image = pygame.Surface(
-            [square_width, square_width], pygame.SRCALPHA, 32)
-        self.image.convert_alpha()
-        self.piece_image = pygame.image.load(
-            f"frontend/image/{self.letter}.svg")
-        self.image.blit(self.piece_image, (0, 0))
-
-    def draw(self, surface):
-        self.update()
-        surface.blit(self.image, self.rect)
-        self.image.blit(self.piece_image, (0, 0))
 
     @property
     def pos(self):
@@ -34,12 +21,23 @@ class Piece(pygame.sprite.Sprite):
     @pos.setter
     def pos(self, pos):
         # if pos[0] in range(8) and pos[1] in range(8):
-        self._pos == pos
+        self._pos = pos
+
+    @property
+    def piece_letter(self):
+        return self._piece_letter
+
+    @piece_letter.setter
+    def piece_letter(self, piece_letter):
+        self._piece_letter = piece_letter.lower() if self.colour.lower(
+        ) == "b" else piece_letter.upper()
 
     def update(self):
-        if self.in_position:
-            self.rect = (self.pos[1]*self.square_width,
-                         self.pos[0]*self.square_width, self.square_width, self.square_width)
-        else:
-            self.rect = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[
-                         0], self.square_width, self.square_width)
+        self.rect = (self.pos[1]*self.square_width,
+                     self.pos[0]*self.square_width, self.square_width, self.square_width)
+        self.piece_image = pygame.image.load(
+            f"frontend/image/{self.piece_letter}.svg")
+        self.image = pygame.Surface(
+            [self.square_width, self.square_width], pygame.SRCALPHA, 32)
+        self.image.convert_alpha()
+        self.image.blit(self.piece_image, (0, 0))

@@ -49,11 +49,15 @@ class Board(pygame.Surface):
                 if white_piece_things[x][y]:
                     piece = [p for p in self.white_pieces.sprites() if p.number ==
                              white_piece_things[x][y][1]][0]
-                    piece._pos = (x, y)
+                    piece.pos = (x, y)
+                    white_piece_things[x][y]
+                    piece.piece_letter = white_piece_things[x][y][0]
+
                 elif black_piece_things[x][y]:
                     piece = [p for p in self.black_pieces.sprites() if p.number ==
                              black_piece_things[x][y][1]][0]
-                    piece._pos = (x, y)
+                    piece.pos = (x, y)
+                    piece.piece_letter = black_piece_things[x][y][0]
 
         white_pieces = [p for p in self.white_pieces.sprites() if p.number not in
                         [p[1] for p in sum(white_piece_things, []) if p]]
