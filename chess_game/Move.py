@@ -82,7 +82,6 @@ class BaseMove:
         # This is the worst function I have ever written
         piece_letters = ["R", "N", "P", "B", "K", "Q"]
 
-        print("Opened the function")
 
         def get_king(colour):
             king = [p for p in gamestate.get_pieces_by_colour(colour)
@@ -112,9 +111,7 @@ class BaseMove:
             # return PromotionMove(gamestate, coord, promote_to=promote_to_class)
 
         if algebraic_move[0] in piece_letters:
-            print("P is first letter")
             coord = BaseMove.coord_to_pos(algebraic_move[-2:])
-            print("position_to is ", coord)
             if not coord:
                 return None
             possible_moves = [

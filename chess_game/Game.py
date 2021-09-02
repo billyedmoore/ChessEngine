@@ -110,7 +110,6 @@ class Game:
             self._gamestate.make_move(move)
 
     def make_move(self, algebraic_move):
-        
         colour_playing = self.gamestate.player_to_play
         move = Move.from_algebraic_notation(
             self.gamestate, colour_playing, algebraic_move)
@@ -139,7 +138,7 @@ class Game:
         else:
             return None
 
-        if pos_to[1] == info["end_row"]:
+        if pos_to[1] == info["end_row"] and piece_letter.upper() == "P":
             move = PromotionMove(self.gamestate, pos_from, pos_to)
         else:
             move = Move(self.gamestate, pos_from, pos_to)

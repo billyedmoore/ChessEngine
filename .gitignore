@@ -155,3 +155,6 @@ fabric.properties
 
 # Personal additions
 notes.md
+users.db
+user.db
+test.db

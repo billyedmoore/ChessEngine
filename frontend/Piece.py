@@ -40,4 +40,6 @@ class Piece(pygame.sprite.Sprite):
         self.image = pygame.Surface(
             [self.square_width, self.square_width], pygame.SRCALPHA, 32)
         self.image.convert_alpha()
-        self.image.blit(self.piece_image, (0, 0))
+        rect = self.piece_image.get_rect(
+            center=(self.square_width/2, self.square_width/2))
+        self.image.blit(self.piece_image, rect)
