@@ -13,14 +13,16 @@ class Database():
             self.create_tables()
         else:
             if not os.path.isfile(f"{self.db_name}"):
-                print("db dont exist")
+                # print("creating database")
                 self.create_tables()
 
-    def _sql_query(self, sql, data=()):
+    def _sql_query(self, sql, data=(), get_last_row_id=False):
         with sqlite3.connect(self.db_name) as db:
             cur = db.cursor()
             cur.execute(sql, data)
             result = cur.fetchall()
+            if get_last_row_id:
+                result = cur.lastrowid
             db.commit()
         return result
 
@@ -46,9 +48,8 @@ class Database():
         Get user details, only allows you to get details with the corrected 
         hashed_password
         """
-        sql = "SELECT * FROM User WHERE Username=?"
+        sql = "SELECT UserId,Username,Email,Password,Salt,ELO FROM User WHERE Username=?"
         user = self._sql_query(sql, data=(username,))
-        print(user)
         if user:
             return user[0]
         else:
@@ -64,7 +65,8 @@ class Database():
         if pass_hash:
             return pass_hash[0][0], pass_hash[0][1]
         else:
-            return None
+            print(f"No hash with the username {username}")
+            return None, None
 
     def insert_user(self, username, email, pass_hash, salt, elo=1500):
         """
@@ -72,4 +74,5 @@ class Database():
         """
         sql = "INSERT INTO User (Username,Email,Password,Salt,ELO) VALUES (?,?,?,?,?)"
         data = (username, email, pass_hash, salt, elo)
-        self._sql_query(sql, data=data)
+        user_id = self._sql_query(sql, data=data, get_last_row_id=True)
+        return user_id

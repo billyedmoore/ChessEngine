@@ -82,7 +82,6 @@ class BaseMove:
         # This is the worst function I have ever written
         piece_letters = ["R", "N", "P", "B", "K", "Q"]
 
-
         def get_king(colour):
             king = [p for p in gamestate.get_pieces_by_colour(colour)
                     if p.letter.upper() == "K"][0]

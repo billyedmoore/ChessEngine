@@ -68,26 +68,41 @@ class Server():
             login - returns a string session auth string
                 username - the username
                 password - the unhashed password
-
         """
-        def get_random_string(length=10):
-            return "".join(random.choice(
-                string.digits+string.ascii_uppercase) for i in range(length))
         valid_requests = ["login"]
         if request.get("request") not in valid_requests:
             return {"error": "Invalid user request"}
         elif request.get("request") == "login":
-            user = User.get_user(request.get("username"),
-                                 request.get("password"))
-            if user:
-                # TODO check that the user is not allready logged in
+            self._user_login(request)
+
+    def _user_login(self, request):
+        def get_random_string(length=10):
+            return "".join(random.choice(
+                string.digits+string.ascii_uppercase) for i in range(length))
+
+        user = User.get_user(request.get("username"),
+                             request.get("password"))
+        if user:
+
+            # if user allready logged in
+            if user.username in [u.username for u in self.users.values()]:
+                # get the user from self.users
+                user = [u for u in self.users.values() if u.username ==
+                        user.username][0]
+                # get the auth_string that is associated with that user
+                auth_string = [
+                    k for k, v in self.users.items() if v == user][0]
+                return {"session_auth": auth_string}
+
+            # if user is not yet logged in
+            else:
                 auth_string = get_random_string()
                 while auth_string in self.users.keys():
                     auth_string = get_random_string()
                 self.users[auth_string] = user
                 return {"session_auth": auth_string}
-            else:
-                return {"error": "Invalid username or password"}
+        else:
+            return {"error": "Invalid username or password"}
 
     def _handle_game_request(self, request):
         valid_requests = []
