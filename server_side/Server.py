@@ -1,4 +1,5 @@
 import socket
+from chess_game.Game import Game
 import json
 from .User import User
 import random
@@ -8,7 +9,8 @@ import string
 class Server():
     """
     Server to handle requests from the client, this will allow for online games
-    handing users and global rankings.
+    handing users and global rankings. Extra arguments in json objects will be
+    ignored without error.
 
     Requests should be in the format:
         {
@@ -26,7 +28,8 @@ class Server():
         self.host = host
         self.port = port
         self.users = {}
-        self.games = {}
+        self.games = []
+        self.matching_queue = []
         self.listening = True
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -41,11 +44,7 @@ class Server():
             request = self.bytes_to_json(request)
             if type(request) != dict:
                 response = "Please provide your request as a json object (python dict)"
-            if request.get("type") == "game":
-                response = self._handle_game_request(request)
-            elif request.get("type") == "user":
-                response = self._handle_user_request(request)
-
+            response = self._handle_request(request)
             conn.send(json.dumps(response).encode("utf-8"))
             conn.close()
         self.server.close()
@@ -62,18 +61,32 @@ class Server():
         data = data.decode("utf-8")
         return json.loads(data)
 
+    def _handle_request(self, request):
+        print(request)
+        if request.get("type") == "game":
+            print("game request")
+            response = self._handle_game_request(request)
+        elif request.get("type") == "user":
+            print("user request")
+            response = self._handle_user_request(request)
+
+        return response
+
     def _handle_user_request(self, request):
         """
         Valid user requests:
             login - returns a string session auth string
-                username - the username
-                password - the unhashed password
+                parameters:
+                    username - the username
+                    password - the unhashed password
+                returns:
+                    session_auth - string to be used to authenicate users
         """
         valid_requests = ["login"]
         if request.get("request") not in valid_requests:
             return {"error": "Invalid user request"}
         elif request.get("request") == "login":
-            self._user_login(request)
+            return self._user_login(request)
 
     def _user_login(self, request):
         def get_random_string(length=10):
@@ -105,6 +118,63 @@ class Server():
             return {"error": "Invalid username or password"}
 
     def _handle_game_request(self, request):
-        valid_requests = []
+        """
+        Valid user requests:
+            join_game - adds a to the waiting list for games or adds to a game
+                        if more than one is allready waiting
+                parameters:
+                    session_auth - a string provided when a user logs in
+                returns:
+                    game_id - ONLY RETURNED IF ADDED TO GAME
+            get_current_game_id - gets the id of the game
+        """
+        valid_requests = ["join_game", "get_current_game_id"]
         if request.get("request") not in valid_requests:
-            return {"error": "Invalid user request"}
+            return {"error": "Invalid game request"}
+        elif not self._is_valid_auth_string(request.get("session_auth")):
+            return {"error": "User not authenticated"}
+        elif request.get("request") == "join_game":
+            return self._join_game_route(request)
+        elif request.get("request") == "get_current_game_id":
+            return self._get_current_game_id_route(request)
+
+    def _is_valid_auth_string(self, string):
+        return (string in self.users.keys())
+
+    def _join_game_route(self, request):
+        """
+        Join the queue for joining a game or join one
+        """
+        game_id = self._get_current_game_id(request.get("session_auth"))
+        if game_id in range(len(self.games)):
+            return {"error": f"Already in game {game_id}"}
+        elif len(self.matching_queue) == 0:
+            self.matching_queue.append(request.get("session_auth"))
+            return {}
+        else:
+            game = Game(None, None)
+            index = len(self.games)
+            self.games.append({"w": request.get("session_auth"),
+                               "b": self.matching_queue[0],
+                               "game": game})
+            self.matching_queue.pop(0)
+            return {"game_id": index}
+
+    def _get_current_game_id(self, auth_string):
+        for game in self.games:
+            players_in_game = [game["w"], game["b"]]
+            if auth_string in players_in_game:
+                return self.games.index(game)
+        else:
+            return None
+
+    def _get_current_game_id_route(self, request):
+        """
+        Serve the current game_id of a user in a json object
+        """
+        session_auth = request.get("session_auth")
+        game_id = self._get_current_game_id(session_auth)
+        if type(game_id) == int:
+            return {"game_id": game_id}
+        else:
+            return {"error": "User not in a game."}

@@ -155,6 +155,7 @@ fabric.properties
 
 # Personal additions
 notes.md
+client2.py
 users.db
 user.db
 test.db
