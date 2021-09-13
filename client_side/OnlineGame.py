@@ -8,4 +8,4 @@ class OnlineGame():
         return self.app.client.get_one_colour_board().get("board")
 
     def make_move(self, move):
-        return self.app.client.make_move(move)
+        return self.app.client.make_move(move).get("made_move")
