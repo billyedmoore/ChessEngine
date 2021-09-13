@@ -5,10 +5,14 @@ import hashlib
 
 
 class User():
+    """
+    Server side user class
+    """
 
     def __init__(self, user_id, username, email, password, elo=1500, db_name="user.db"):
         self.db_name = db_name
         self.db = Database(db_name=self.db_name)
+        self.id = user_id
         self.username = username
         self.email = email
         self.password = password
@@ -38,7 +42,7 @@ class User():
         if details:
             print(details)
             user = User(details[0], details[1], details[2],
-                        password, elo=details[4])
+                        password, elo=details[5])
             return (user if user.is_auth() else None)
         else:
             return None

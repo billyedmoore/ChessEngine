@@ -1,4 +1,5 @@
 import pygame
+from client_side.User import User
 from . import TextBox, Button
 
 
@@ -23,7 +24,10 @@ class LoginScreen(pygame.Surface):
 
     def login_attempt(self, username, password):
         print(f"Username: {username}, Password: {password}")
-        self.app.open_menu()
+        user = User.login(self.app.client, username, password)
+
+        if user:
+            self.app.handle_login(user)
 
     def tick(self):
         pass

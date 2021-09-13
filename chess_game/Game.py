@@ -102,7 +102,8 @@ class Game:
         self._gamestate.print()
 
     def tick(self):
-        # if no player is set moves will be made by the frontend
+        # if no player is set moves should be made explicitly with the make move
+        # method
         players = {"w": self._white_player, "b": self._black_player}
         player_to_play = players[self._gamestate.player_to_play.lower()]
         if player_to_play:
@@ -113,10 +114,11 @@ class Game:
         colour_playing = self.gamestate.player_to_play
         move = Move.from_algebraic_notation(
             self.gamestate, colour_playing, algebraic_move)
-        print(algebraic_move, " -> ", move)
         if move:
             self.gamestate.make_move(move)
+            return True
         self.gamestate.print()
+        return False
 
     def get_algebraic_notation(self, pos_from, pos_to):
         special_moves = {"b": {((4, 0), (7, 0)): "O-O", ((4, 0), (0, 0)): "O-O-O"},

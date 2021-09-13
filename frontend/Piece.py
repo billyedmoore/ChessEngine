@@ -12,7 +12,7 @@ class Piece(pygame.sprite.Sprite):
         self._piece_letter = piece_letter.lower() if piece_colour.lower(
         ) == "b" else piece_letter.upper()
         self.colour = piece_colour.lower()
-        self.square_width = square_width
+        self.square_width = int(square_width)
 
     @property
     def pos(self):
@@ -37,6 +37,8 @@ class Piece(pygame.sprite.Sprite):
                      self.pos[0]*self.square_width, self.square_width, self.square_width)
         self.piece_image = pygame.image.load(
             f"frontend/image/{self.piece_letter}.svg")
+        self.piece_image = pygame.transform.smoothscale(
+            self.piece_image, (self.square_width, self.square_width))
         self.image = pygame.Surface(
             [self.square_width, self.square_width], pygame.SRCALPHA, 32)
         self.image.convert_alpha()

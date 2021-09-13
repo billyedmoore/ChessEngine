@@ -11,7 +11,8 @@ class Board(pygame.Surface):
 
     def __init__(self, app, parent_surface, x, y, total_side_length,
                  white_player=None, black_player=None,
-                 white_colour=(90, 90, 90), black_colour=(40, 40, 40)):
+                 white_colour=(90, 90, 90), black_colour=(40, 40, 40),
+                 online=False):
         self.app = app
         self.x = x
         self.y = y
@@ -36,10 +37,10 @@ class Board(pygame.Surface):
             for y in range(8):
                 if white_piece_things[x][y]:
                     self.white_pieces.add(
-                        Piece(white_piece_things[x][y][1], (x, y), (320//8), white_piece_things[x][y][0], "w"))
+                        Piece(white_piece_things[x][y][1], (x, y), self.square_width, white_piece_things[x][y][0], "w"))
                 elif black_piece_things[x][y]:
                     self.black_pieces.add(
-                        Piece(black_piece_things[x][y][1], (x, y), (320//8), black_piece_things[x][y][0], "b"))
+                        Piece(black_piece_things[x][y][1], (x, y), self.square_width, black_piece_things[x][y][0], "b"))
 
     def update_sprites(self):
         white_piece_things = self.game.get_one_colour_board("w")
