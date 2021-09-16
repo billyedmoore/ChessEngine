@@ -1,4 +1,6 @@
 import pygame
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
 
 
 class Piece(pygame.sprite.Sprite):
@@ -33,15 +35,17 @@ class Piece(pygame.sprite.Sprite):
         ) == "b" else piece_letter.upper()
 
     def update(self):
-        self.rect = (self.pos[1]*self.square_width,
-                     self.pos[0]*self.square_width, self.square_width, self.square_width)
-        self.piece_image = pygame.image.load(
-            f"frontend/image/{self.piece_letter.lower()}_{self.piece_colour.lower()}.svg")
-        self.piece_image = pygame.transform.smoothscale(
-            self.piece_image, (self.square_width, self.square_width))
+        self.rect = (self.pos[1] * self.square_width,
+                     self.pos[0] * self.square_width, self.square_width, self.square_width)
+
+        image = svg2rlg(f"frontend/image/{self.piece_letter.lower()}_{self.colour.lower()}.svg")
+        pilImage = renderPM.drawToPIL(image)
+        pilImage.resize((self.square_width,self.square_width))
+        self.piece_image = pygame.image.fromstring(
+            pilImage.tobytes(), pilImage.size, pilImage.mode).convert()
         self.image = pygame.Surface(
             [self.square_width, self.square_width], pygame.SRCALPHA, 32)
-        self.image.convert_alpha()
+        # self.image.convert_alpha()
         rect = self.piece_image.get_rect(
-            center=(self.square_width/2, self.square_width/2))
+            center=(self.square_width / 2, self.square_width / 2))
         self.image.blit(self.piece_image, rect)

@@ -15,7 +15,7 @@ class TextBox(pygame.Surface):
         self.placeholder_text = placeholder_text
         self.surface = surface
         self.font = font if font else pygame.font.SysFont("freemono", 20)
-        self.text = ""
+        self.text = "password"
         self.text_hidden = text_hidden
         self.text_surface = self.font.render(
             (self.text if not self.text_hidden else ("*"*len(self.text))), 1, (0, 0, 0))
