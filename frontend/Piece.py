@@ -36,7 +36,7 @@ class Piece(pygame.sprite.Sprite):
         self.rect = (self.pos[1]*self.square_width,
                      self.pos[0]*self.square_width, self.square_width, self.square_width)
         self.piece_image = pygame.image.load(
-            f"frontend/image/{self.piece_letter}.svg")
+            f"frontend/image/{self.piece_letter.lower()}_{self.piece_colour.lower()}.svg")
         self.piece_image = pygame.transform.smoothscale(
             self.piece_image, (self.square_width, self.square_width))
         self.image = pygame.Surface(
