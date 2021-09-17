@@ -4,7 +4,7 @@ from pygame.locals import *
 
 class TextBox(pygame.Surface):
 
-    def __init__(self, surface, w, h, x, y, placeholder_text="", font=None,
+    def __init__(self, surface, w, h, x, y, placeholder_text="", font=None,text="",
                  active_colour=(230, 230, 230), inactive_colour=(40, 40, 40),
                  text_hidden=False):
         pygame.Surface.__init__(self, size=(w, h))
@@ -15,7 +15,7 @@ class TextBox(pygame.Surface):
         self.placeholder_text = placeholder_text
         self.surface = surface
         self.font = font if font else pygame.font.SysFont("freemono", 20)
-        self.text = "password"
+        self.text = text
         self.text_hidden = text_hidden
         self.text_surface = self.font.render(
             (self.text if not self.text_hidden else ("*"*len(self.text))), 1, (0, 0, 0))
