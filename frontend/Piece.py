@@ -36,11 +36,11 @@ class Piece(pygame.sprite.Sprite):
     def update(self):
         self.rect = (self.pos[1] * self.square_width,
                      self.pos[0] * self.square_width, self.square_width, self.square_width)
-        self.piece_image = pygame.image.load(os.path.join("frontend", "image", f"{self.piece_letter.lower()}_{self.colour.lower()}.svg"))
-
+        self.piece_image = pygame.image.load(
+            os.path.join("frontend", "image", f"{self.piece_letter.lower()}_{self.colour.lower()}.svg"))
+        self.piece_image = pygame.transform.scale(self.piece_image, (self.square_width, self.square_width))
         self.image = pygame.Surface(
             [self.square_width, self.square_width], pygame.SRCALPHA, 32)
-        # self.image.convert_alpha()
         rect = self.piece_image.get_rect(
             center=(self.square_width / 2, self.square_width / 2))
         self.image.blit(self.piece_image, rect)
