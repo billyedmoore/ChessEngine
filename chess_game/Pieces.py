@@ -272,7 +272,7 @@ class King(Piece):
                 Move.Move(game_state, self.position, castle_pos) for castle_pos in castling_positions.keys()]
 
             for move in possible_castling_moves:
-                # check wether a check can be made
+                # check weather a check can be made
                 can_castle = True
                 positions = {"k": {"rook_pos": (7, y)}, "q": {
                     "rook_pos": (0, y)}}
@@ -293,9 +293,8 @@ class King(Piece):
                     #       out if the moves legal you need to know if the
                     #       square is under attack
 
-                    # if square.is_under_attack(colours=opposition_colour):
-                    # if (x, y) != (1, y):
-                    # can_castle = False
+                    if square.is_under_attack(colours=opposition_colour):
+                        can_castle = False
                     piece = square.get_piece()
                     if piece:
                         can_castle = False

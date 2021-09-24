@@ -146,7 +146,7 @@ class GameState:
         """
         return(len(self.get_legal_moves(colour)) == 0)
 
-    def get_legal_moves(self, colour: str):
+    def get_legal_moves(self, colour: str,get_castling_moves=True):
         """
         Gets legal moves for a given colour
 
@@ -156,10 +156,10 @@ class GameState:
         pieces_of_colour = self.get_pieces_by_colour(colour)
         legal_moves = []
         for piece in pieces_of_colour:
-            legal_moves.extend(piece.get_legal_moves(self))
+            legal_moves.extend(piece.get_legal_moves(self,get_castling_moves=get_castling_moves))
         return legal_moves
 
-    def get_pseudolegal_moves(self, colour: str):
+    def get_pseudolegal_moves(self, colour: str,get_castling_moves=True):
         """
         Gets psuedolegal moves for a given colour. Includes moves that don't
         break check when in check. To be used to determine check.
@@ -171,7 +171,7 @@ class GameState:
         legal_moves = []
         for piece in pieces_of_colour:
             try:
-                legal_moves.extend(piece.get_pseudolegal_moves(self))
+                legal_moves.extend(piece.get_pseudolegal_moves(self,get_castling_moves=get_castling_moves))
             except TypeError as te:
                 raise te
         return legal_moves

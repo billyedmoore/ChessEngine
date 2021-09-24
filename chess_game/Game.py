@@ -59,16 +59,23 @@ class Game:
         else:
             raise TypeError("Not of type GameState")
 
-    def get_legal_moves(self, colour: str):
+    def get_legal_moves(self):
         """
         Returns a list of legal moves in algebraic notation for a given colour.
 
         Parameters
             str colour - value from the set {"w","W","b","B"}
         """
-        moves = self.gamestate.get_legal_moves()
+        moves = self.gamestate.get_legal_moves(self.player_to_play)
         move_strings = [move.to_algebraic_notation() for move in moves]
         return move_strings
+
+    def possible_move_positions_for_piece(self,coord):
+        moves = [Move.from_algebraic_notation(self.gamestate,self.player_to_play,move) for move in self.get_legal_moves()]
+        moves = [move for move in moves if (move.normal or
+                 move.promotion) and move.position_from == coord]
+        return [move.position_to for move in moves]
+
 
     def get_previous_moves(self, colour: str):
         """

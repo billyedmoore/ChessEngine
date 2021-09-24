@@ -50,10 +50,6 @@ class Client():
             "request": "join_game",
             "session_auth": auth_string
         }
-        get_game_id_request = {
-            "type": "game",
-            "request": "get_game_id",
-            "session_auth": auth_string}
 
         response = self._make_request(request)
         game_id = response.get("game_id")
@@ -64,6 +60,43 @@ class Client():
 
         return game_id
 
+    """
+    Methods for OnlineGame class
+    """
+
+    def is_game_over(self):
+        session_auth = self.app.user.session_auth
+        request = {
+            "type": "game",
+            "request": "is_game_over",
+            "session_auth": session_auth,
+        }
+
+        response = self._make_request(request).get("is_game_over")
+
+    def get_legal_moves(self):
+        session_auth = self.app.user.session_auth
+        request = {
+            "type": "game",
+            "request": "get_legal_moves",
+            "session_auth": session_auth,
+        }
+
+        response = self._make_request(request).get("is_game_over")
+
+
+    def get_previous_moves(self,colour):
+        session_auth = self.app.user.session_auth
+        request = {
+            "type": "game",
+            "request": "get_previous_moves",
+            "session_auth": session_auth,
+            "colour": colour
+        }
+
+        response = self._make_request(request).get("previous_moves")
+        return response
+
     def get_one_colour_board(self, colour):
         session_auth = self.app.user.session_auth
         request = {
@@ -73,17 +106,40 @@ class Client():
             "colour": colour
         }
 
-        board = self._make_request(request)
+        board = self._make_request(request).get("board")
 
         return board
 
-    def make_move(self):
+    def make_move(self,move):
         session_auth = self.app.user.session_auth
         request = {
             "type": "game",
             "request": "make_move",
             "session_auth": session_auth,
-            "move": "move"
+            "move": move
+        }
+        response = self._make_request(request).get("made_move")()
+        return response
+
+    def get_player_to_play(self):
+        session_auth = self.app.user.session_auth
+        request = {
+            "type": "game",
+            "request": "get_player_to_play",
+            "session_auth": session_auth
+        }
+        response = self._make_request(request).get("player_to_play")
+        return response
+
+    def get_algebraic_notation(self,pos_from,pos_to):
+        session_auth = self.app.user.session_auth
+        request = {
+            "type": "game",
+            "request": "make_move",
+            "session_auth": session_auth,
+            "pos_from": pos_from,
+            "pos_to": pos_to
         }
         response = self._make_request(request)
-        return response
+        return response.get("algebraic_notation")
+

@@ -12,7 +12,8 @@ class BaseMove:
     """
     file_values = ["a", "b", "c", "d", "e", "f", "g", "h"]
     rank_values = ["8", "7", "6", "5", "4", "3", "2", "1"]
-
+    performed = False
+    _pos_after_move = ""
     def __init__(self, gamestate):
         self._gamestate = gamestate
 
@@ -144,9 +145,9 @@ class BaseMove:
                             return None
                         else:
                             return possible_moves[0]
-                    if splice in rank_values:
+                    if splice in Move.rank_values:
                         for m in possible_moves_cpy:
-                            if m.position_from[1] == rank_values.index(splice):
+                            if m.position_from[1] == Move.rank_values.index(splice):
                                 possible_moves.append(m)
                         if len(possible_moves) != 1:
                             return None
@@ -386,7 +387,7 @@ class PromotionMove(BaseMove):
         if self.captured:
             square_to.set_piece(self.captured)
         piece_to = self._promote_from(
-            square_from.position, piece_to.colour, move_count=piece_to.move_count)
+            square_from.position, self.piece_to.colour, move_count=self.piece_to.move_count)
         piece_to.forget_move()
         square_to.set_piece(piece_to)
 

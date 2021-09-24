@@ -12,15 +12,23 @@ class Board(pygame.Surface):
     def __init__(self, app, parent_surface, x, y, total_side_length,
                  white_player=None, black_player=None,
                  white_colour=(90, 90, 90), black_colour=(40, 40, 40),
+                 white_selected_colour=(200, 200, 200), black_selected_colour=(0, 0, 0),
                  online=False):
+        self._from_pos = None
         self.app = app
         self.x = x
         self.y = y
-        self.square_width = total_side_length//8
+        self.square_width = total_side_length // 8
         self.black_colour = black_colour
         self.white_colour = white_colour
         self.white_player = white_player
+        self.black_selected_colour = black_selected_colour
+        self.white_selected_colour = white_selected_colour
         self.black_player = black_player
+
+        # a list of moves possible for the piece currently selected
+        self.possible_moves = []
+
         self.game = Game.Game(self.white_player, self.black_player)
         self.create_sprites()
         self.parent_surface = parent_surface
@@ -41,6 +49,19 @@ class Board(pygame.Surface):
                 elif black_piece_things[x][y]:
                     self.black_pieces.add(
                         Piece(black_piece_things[x][y][1], (x, y), self.square_width, black_piece_things[x][y][0], "b"))
+
+    @property
+    def from_pos(self):
+        return self._from_pos
+
+    @from_pos.setter
+    def from_pos(self, _from_pos):
+        if _from_pos:
+            self._from_pos = _from_pos
+            self.possible_moves = self.game.possible_move_positions_for_piece(self._from_pos)
+        else:
+            self._from_pos = None
+            self.possible_moves = []
 
     def update_sprites(self):
         white_piece_things = self.game.get_one_colour_board("w")
@@ -69,17 +90,21 @@ class Board(pygame.Surface):
 
     def draw_squares(self):
         x_names = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        square_width = self.get_width()//8
+        square_width = self.get_width() // 8
         colour_bit = True
         for x in range(8):
             colour_bit = not colour_bit
             text = self.app.font.render(
                 x_names[x], 1, (self.black_colour if colour_bit else self.white_colour))
             for y in range(8):
-                pygame.draw.rect(self, (self.white_colour if colour_bit else self.black_colour),
-                                 (x*square_width, y*square_width, square_width, square_width))
+                if (x,y) in self.possible_moves:
+                    col = self.white_selected_colour if colour_bit else self.black_selected_colour
+                else:
+                    col = (self.white_colour if colour_bit else self.black_colour)
+                pygame.draw.rect(self, col,
+                                 (x * square_width, y * square_width, square_width, square_width))
                 colour_bit = not colour_bit
-            self.blit(text, (x*square_width, 0))
+            self.blit(text, (x * square_width, 0))
 
     def tick(self):
         # TODO: make this async so that it dont block the drawing
@@ -104,20 +129,19 @@ class Board(pygame.Surface):
     def handle_event(self, event):
         if event.type in [MOUSEBUTTONDOWN, MOUSEBUTTONUP]:
             if self.get_rect(topleft=(self.x, self.y)).collidepoint(event.pos):
-                pos_in_board = (event.pos[0]-self.x, event.pos[1]-self.y)
-                coord = (int((event.pos[0]-self.x)//self.square_width),
-                         int((event.pos[1]-self.y)//self.square_width))
+                pos_in_board = (event.pos[0] - self.x, event.pos[1] - self.y)
+                coord = (int((event.pos[0] - self.x) // self.square_width),
+                         int((event.pos[1] - self.y) // self.square_width))
                 if event.type == MOUSEBUTTONDOWN:
                     self.down = True
                     self.from_pos = coord
+                    self.possible_moves = self.game.possible_move_positions_for_piece(self.from_pos)
                 elif event.type == MOUSEBUTTONUP:
                     if self.down and self.from_pos:
-                        # print(f"{self.from_pos} -> {coord}")
                         algebraic = self.game.get_algebraic_notation(
                             self.from_pos, coord)
                         print(algebraic)
                         self.game.make_move(algebraic)
-
                         # TODO handle castling moves and promotion moves
                     self.down = False
                     self.from_pos = None
@@ -145,19 +169,19 @@ class MoveTable(pygame.Surface):
         self.white_moves = self.game.get_previous_moves("w")[-10:]
         self.black_moves = self.game.get_previous_moves("b")[-10:]
         self.parent_surface.blit(self, (self.x, self.y))
-        pygame.draw.rect(self, self.white_colour, (0, 0, self.w/2, self.h))
+        pygame.draw.rect(self, self.white_colour, (0, 0, self.w / 2, self.h))
         pygame.draw.rect(self, self.black_colour,
-                         (self.w/2, 0, self.w/2, self.h))
+                         (self.w / 2, 0, self.w / 2, self.h))
         # self.fill((90, 90, 90))
         text_height = 30
         for move in range(len(self.white_moves)):
             text = self.app.font.render(
                 self.white_moves[move], 0.5, (255, 255, 255))
-            self.blit(text, (0, text_height*move))
+            self.blit(text, (0, text_height * move))
         for move in range(len(self.black_moves)):
             text = self.app.font.render(
                 self.black_moves[move], 1, (255, 255, 255))
-            self.blit(text, (self.w/2, text_height*move))
+            self.blit(text, (self.w / 2, text_height * move))
 
     def handle_event(self, event):
         pass
@@ -171,12 +195,12 @@ class GameScreen(pygame.Surface):
     def __init__(self, app, w, h, white_player=None, black_player=None):
         pygame.Surface.__init__((self), size=(w, h))
         self.surface = app.screen  # surface refers to parent surface
-        remaining_width = (h-h/4)
-        menu_screen_x = ((w-remaining_width)-w/2)
-        self.board = Board(app, self, remaining_width, h/20, w/2,
+        remaining_width = (h - h / 4)
+        menu_screen_x = ((w - remaining_width) - w / 2)
+        self.board = Board(app, self, remaining_width, h / 20, w / 2,
                            white_player=white_player, black_player=black_player)
         self.move_table = MoveTable(
-            app, self, menu_screen_x, h/20, remaining_width-(1.5*(menu_screen_x)), w/2,  self.board.game)
+            app, self, menu_screen_x, h / 20, remaining_width - (1.5 * (menu_screen_x)), w / 2, self.board.game)
         self.fill((20, 20, 20))
 
     def draw(self):

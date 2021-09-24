@@ -99,7 +99,7 @@ class Server():
     def _user_login_route(self, request):
         def get_random_string(length=10):
             return "".join(random.choice(
-                string.digits+string.ascii_uppercase) for i in range(length))
+                string.digits + string.ascii_uppercase) for i in range(length))
 
         user = User.get_user(request.get("username"),
                              request.get("password"))
@@ -153,7 +153,12 @@ class Server():
                           "get_one_colour_board": self._get_one_colour_board_route,
                           "make_move": self._make_move_route,
                           "get_legal_moves": self._get_legal_moves_route,
-                          "get_previous_moves": self._get_previous_moves_route}
+                          "get_previous_moves": self._get_previous_moves_route,
+                          "is_game_over": self._is_game_over_route,
+                          "get_player_to_play": self._get_player_to_play_route,
+                          "possible_move_positions_for_piece": self._possible_move_positions_from_piece_route,
+                          "get_algebraic_notation": self._get_algebraic_notation_route}
+
 
         req = request.get("request")
         if req not in valid_requests.keys():
@@ -201,10 +206,7 @@ class Server():
             return {"error": "User not in a game."}
         else:
             game = self.games[game_id]
-            colour = request.get("colour")
-            if not self.is_valid_colour(colour):
-                return {"error": "Invalid colour argument"}
-            return {"legal_moves": game.get_legal_moves(colour)}
+            return {"legal_moves": game.get_legal_moves()}
 
     def _make_move_route(self, request):
         game_id = self._get_current_game_id(request.get("session_auth"))
@@ -213,6 +215,28 @@ class Server():
         else:
             move = request.get("move")
             return {"made_move": self.games[game_id]["game"].make_move(move)}
+
+    def _is_game_over_route(self, request):
+        game_id = self._get_current_game_id(request.get("session_auth"))
+        if type(game_id) != int:
+            return {"error": "User not in a game."}
+        else:
+            return {"is_game_over": self.games[game_id]["game"].is_game_over}
+
+    def _get_player_to_play_route(self, request):
+        game_id = self._get_current_game_id(request.get("session_auth"))
+        if type(game_id) != int:
+            return {"error": "User not in a game."}
+        else:
+            return {"player_to_play": self.games[game_id]["game"].player_to_play}
+
+    def _possible_move_positions_from_piece_route(self, request):
+        game_id = self._get_current_game_id(request.get("session_auth"))
+        if type(game_id) != int:
+            return {"error": "User not in a game."}
+        else:
+            coord = request.get("coord")
+            return {"possible_positions": self.games[game_id]["game"].possible_move_positions_from_piece(coord)}
 
     def _get_current_game_id(self, auth_string):
         for game in self.games:
@@ -232,3 +256,24 @@ class Server():
             return {"game_id": game_id}
         else:
             return {"error": "User not in a game."}
+
+    def _get_previous_moves_route(self,request):
+        """
+        Serve the current game_id of a user in a json object
+        """
+        session_auth = request.get("session_auth")
+        game_id = self._get_current_game_id(session_auth)
+        if type(game_id) == int:
+            return {"error": "User not in a game."}
+        else:
+            colour = request.get("colour")
+            return {"previous_moves": self.games[game_id]["game"].get_previous_moves(colour)}
+
+    def _get_algebraic_notation_route(self, request):
+        game_id = self._get_current_game_id(request.get("session_auth"))
+        if type(game_id) != int:
+            return {"error": "User not in a game."}
+        else:
+            pos_from = request.get("pos_from")
+            pos_to = request.get("pos_to")
+            return {"algebraic_notation": self.games[game_id]["game"].get_algebraic_notation(pos_from, pos_to)}
