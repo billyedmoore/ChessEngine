@@ -61,10 +61,9 @@ class Game:
 
     def get_legal_moves(self):
         """
-        Returns a list of legal moves in algebraic notation for a given colour.
+        Returns a list of legal moves .
 
         Parameters
-            str colour - value from the set {"w","W","b","B"}
         """
         moves = self.gamestate.get_legal_moves(self.player_to_play)
         move_strings = [move.to_algebraic_notation() for move in moves]

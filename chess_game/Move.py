@@ -20,7 +20,8 @@ class BaseMove:
     def clone(self):
         pass
 
-    def is_valid_position(self, position: tuple):
+    @staticmethod
+    def is_valid_position(position: tuple):
         for i in position:
             if type(i) != int:
                 return False

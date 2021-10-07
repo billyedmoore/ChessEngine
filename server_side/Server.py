@@ -17,7 +17,7 @@ class Server():
             "type" : ["game" or "user"],
             "session_auth" : "string" (not allways required),
             "request" : "request" (like a function name),
-            arrgs* : any arrgs required by the function
+            args* : any args required by the function
         }
 
     Methods:
@@ -159,7 +159,6 @@ class Server():
                           "possible_move_positions_for_piece": self._possible_move_positions_from_piece_route,
                           "get_algebraic_notation": self._get_algebraic_notation_route}
 
-
         req = request.get("request")
         if req not in valid_requests.keys():
             return {"error": "Invalid game request"}
@@ -186,7 +185,8 @@ class Server():
             index = len(self.games)
             self.games.append({"w": request.get("session_auth"),
                                "b": self.matching_queue[0],
-                               "game": game})
+                               "game": game,
+                               "last_player":"b"})
             self.matching_queue.pop(0)
             return {"game_id": index}
 
@@ -230,6 +230,14 @@ class Server():
         else:
             return {"player_to_play": self.games[game_id]["game"].player_to_play}
 
+    def _tick_route(self, request):
+        game_id = self._get_current_game_id(request.get("session_auth"))
+        if type(game_id) != int:
+            return {"error": "User not in a game."}
+        else:
+            self.games[game_id]["game"].tick()
+            return {}
+
     def _possible_move_positions_from_piece_route(self, request):
         game_id = self._get_current_game_id(request.get("session_auth"))
         if type(game_id) != int:
@@ -257,7 +265,7 @@ class Server():
         else:
             return {"error": "User not in a game."}
 
-    def _get_previous_moves_route(self,request):
+    def _get_previous_moves_route(self, request):
         """
         Serve the current game_id of a user in a json object
         """

@@ -1,4 +1,5 @@
 import pygame
+from client_side import OnlineGame
 import threading
 from pygame.locals import MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
@@ -14,6 +15,7 @@ class Board(pygame.Surface):
                  white_colour=(90, 90, 90), black_colour=(40, 40, 40),
                  white_selected_colour=(200, 200, 200), black_selected_colour=(0, 0, 0),
                  online=False):
+
         self._from_pos = None
         self.app = app
         self.x = x
@@ -29,7 +31,11 @@ class Board(pygame.Surface):
         # a list of moves possible for the piece currently selected
         self.possible_moves = []
 
-        self.game = Game.Game(self.white_player, self.black_player)
+        if not online:
+            self.game = Game.Game(self.white_player, self.black_player)
+        else:
+            self.game = OnlineGame.OnlineGame(app)
+
         self.create_sprites()
         self.parent_surface = parent_surface
         pygame.Surface.__init__((self), size=(
@@ -192,7 +198,7 @@ class GameScreen(pygame.Surface):
     Page to display and play a chess game with a specified set of options.
     """
 
-    def __init__(self, app, w, h, white_player=None, black_player=None):
+    def __init__(self, app, w, h, white_player=None, black_player=None,online=False):
         pygame.Surface.__init__((self), size=(w, h))
         self.surface = app.screen  # surface refers to parent surface
         remaining_width = (h - h / 4)

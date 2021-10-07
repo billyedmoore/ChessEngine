@@ -2,6 +2,7 @@ import socket
 import json
 
 
+
 class Client():
     """
     Makes requests to the Server on behalf of the front end app.
