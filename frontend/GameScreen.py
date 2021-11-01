@@ -64,7 +64,8 @@ class Board(pygame.Surface):
     def from_pos(self, _from_pos):
         if _from_pos:
             self._from_pos = _from_pos
-            self.possible_moves = self.game.possible_move_positions_for_piece(self._from_pos)
+            self.possible_moves = self.game.possible_move_positions_for_piece(
+                self._from_pos)
         else:
             self._from_pos = None
             self.possible_moves = []
@@ -103,7 +104,7 @@ class Board(pygame.Surface):
             text = self.app.font.render(
                 x_names[x], 1, (self.black_colour if colour_bit else self.white_colour))
             for y in range(8):
-                if (x,y) in self.possible_moves:
+                if (x, y) in self.possible_moves:
                     col = self.white_selected_colour if colour_bit else self.black_selected_colour
                 else:
                     col = (self.white_colour if colour_bit else self.black_colour)
@@ -141,7 +142,8 @@ class Board(pygame.Surface):
                 if event.type == MOUSEBUTTONDOWN:
                     self.down = True
                     self.from_pos = coord
-                    self.possible_moves = self.game.possible_move_positions_for_piece(self.from_pos)
+                    self.possible_moves = self.game.possible_move_positions_for_piece(
+                        self.from_pos)
                 elif event.type == MOUSEBUTTONUP:
                     if self.down and self.from_pos:
                         algebraic = self.game.get_algebraic_notation(
@@ -198,13 +200,13 @@ class GameScreen(pygame.Surface):
     Page to display and play a chess game with a specified set of options.
     """
 
-    def __init__(self, app, w, h, white_player=None, black_player=None,online=False):
+    def __init__(self, app, w, h, white_player=None, black_player=None, online=False):
         pygame.Surface.__init__((self), size=(w, h))
         self.surface = app.screen  # surface refers to parent surface
         remaining_width = (h - h / 4)
         menu_screen_x = ((w - remaining_width) - w / 2)
         self.board = Board(app, self, remaining_width, h / 20, w / 2,
-                           white_player=white_player, black_player=black_player)
+                           white_player=white_player, black_player=black_player, online=online)
         self.move_table = MoveTable(
             app, self, menu_screen_x, h / 20, remaining_width - (1.5 * (menu_screen_x)), w / 2, self.board.game)
         self.fill((20, 20, 20))

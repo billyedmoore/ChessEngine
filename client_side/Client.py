@@ -2,7 +2,6 @@ import socket
 import json
 
 
-
 class Client():
     """
     Makes requests to the Server on behalf of the front end app.
@@ -43,7 +42,7 @@ class Client():
         user["session_auth"] = session_auth
         return user
 
-    def join_game(self, username, password):
+    def join_game(self):
         auth_string = self.app.user.session_auth
 
         request = {
@@ -53,11 +52,13 @@ class Client():
         }
 
         response = self._make_request(request)
+        print("server responded ", response)
         game_id = response.get("game_id")
 
-        while not game_id:
+        while not type(game_id) == int:
             response = self._make_request(request)
             game_id = response.get("game_id")
+        print(game_id)
 
         return game_id
 
@@ -85,8 +86,7 @@ class Client():
 
         response = self._make_request(request).get("is_game_over")
 
-
-    def get_previous_moves(self,colour):
+    def get_previous_moves(self, colour):
         session_auth = self.app.user.session_auth
         request = {
             "type": "game",
@@ -111,7 +111,20 @@ class Client():
 
         return board
 
-    def make_move(self,move):
+    def possible_move_positions_for_piece(self, coord):
+        session_auth = self.app.user.session_auth
+        request = {
+            "type": "game",
+            "request": "possible_move_positions_for_piece",
+            "session_auth": session_auth,
+            "coord": coord
+        }
+        response = self._make_request(request).get("possible_positions")
+        if not response:
+            response == []
+        return response
+
+    def make_move(self, move):
         session_auth = self.app.user.session_auth
         request = {
             "type": "game",
@@ -119,7 +132,7 @@ class Client():
             "session_auth": session_auth,
             "move": move
         }
-        response = self._make_request(request).get("made_move")()
+        response = self._make_request(request).get("made_move")
         return response
 
     def get_player_to_play(self):
@@ -132,15 +145,15 @@ class Client():
         response = self._make_request(request).get("player_to_play")
         return response
 
-    def get_algebraic_notation(self,pos_from,pos_to):
+    def get_algebraic_notation(self, pos_from, pos_to):
         session_auth = self.app.user.session_auth
         request = {
             "type": "game",
-            "request": "make_move",
+            "request": "get_algebraic_notation",
             "session_auth": session_auth,
             "pos_from": pos_from,
             "pos_to": pos_to
         }
         response = self._make_request(request)
+        print(response)
         return response.get("algebraic_notation")
-

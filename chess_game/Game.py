@@ -26,7 +26,7 @@ class Game:
 
         Possible Return Values:
             "b" - black wins
-            "w" - white wins 
+            "w" - white wins
             "d" - nobody wins
             ""  - game is not over
         """
@@ -69,12 +69,12 @@ class Game:
         move_strings = [move.to_algebraic_notation() for move in moves]
         return move_strings
 
-    def possible_move_positions_for_piece(self,coord):
-        moves = [Move.from_algebraic_notation(self.gamestate,self.player_to_play,move) for move in self.get_legal_moves()]
+    def possible_move_positions_for_piece(self, coord):
+        moves = [Move.from_algebraic_notation(
+            self.gamestate, self.player_to_play, move) for move in self.get_legal_moves()]
         moves = [move for move in moves if (move.normal or
-                 move.promotion) and move.position_from == coord]
+                                            move.promotion) and move.position_from == coord]
         return [move.position_to for move in moves]
-
 
     def get_previous_moves(self, colour: str):
         """
@@ -92,7 +92,7 @@ class Game:
 
     def get_one_colour_board(self, colour):
         """
-        Returns a repersentaion of the chess board only contating pieces of a 
+        Returns a repersentaion of the chess board only contating pieces of a
         specified colour.
 
         Parameters
@@ -136,7 +136,7 @@ class Game:
         info = colour_info[self.player_to_play.upper()]
         special_moves = special_moves[self.player_to_play.lower()]
         try:
-            move = special_moves[(pos_from, pos_to)]
+            move = special_moves[(tuple(pos_from), tuple(pos_to))]
             return move
         except KeyError as e:
             pass

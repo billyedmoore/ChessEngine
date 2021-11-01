@@ -14,6 +14,7 @@ class BaseMove:
     rank_values = ["8", "7", "6", "5", "4", "3", "2", "1"]
     performed = False
     _pos_after_move = ""
+
     def __init__(self, gamestate):
         self._gamestate = gamestate
 

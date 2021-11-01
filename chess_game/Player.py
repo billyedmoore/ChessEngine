@@ -53,6 +53,4 @@ class TerminalPlayer(BasePlayer):
             algebraic_move = input("move :")
             move = BaseMove.from_algebraic_notation(
                 self.gamestate,  self.colour, algebraic_move)
-            # print(move)
-
         return move

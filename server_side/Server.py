@@ -63,13 +63,14 @@ class Server():
 
     @staticmethod
     def is_valid_colour(colour):
-        return (colour.lower() in ["w", "l"])
+        return (colour.lower() in ["w", "b"])
 
     def _handle_request(self, request):
         print(request)
         if request.get("type") == "game":
             print("game request")
             response = self._handle_game_request(request)
+            print(response)
         elif request.get("type") == "user":
             print("user request")
             response = self._handle_user_request(request)
@@ -165,7 +166,7 @@ class Server():
         elif not self._is_valid_auth_string(request.get("session_auth")):
             return {"error": "User not authenticated"}
         else:
-            valid_requests[req](request)
+            return valid_requests[req](request)
 
     def _is_valid_auth_string(self, string):
         return (string in self.users.keys())
@@ -176,17 +177,17 @@ class Server():
         """
         game_id = self._get_current_game_id(request.get("session_auth"))
         if game_id in range(len(self.games)):
-            return {"error": f"Already in game {game_id}"}
+            return {"error": f"Already in game {game_id}", "game_id": game_id}
         elif len(self.matching_queue) == 0:
             self.matching_queue.append(request.get("session_auth"))
-            return {}
+            return {"string": "number"}
         else:
             game = Game(None, None)
             index = len(self.games)
             self.games.append({"w": request.get("session_auth"),
                                "b": self.matching_queue[0],
                                "game": game,
-                               "last_player":"b"})
+                               "last_player": "b"})
             self.matching_queue.pop(0)
             return {"game_id": index}
 
@@ -244,7 +245,7 @@ class Server():
             return {"error": "User not in a game."}
         else:
             coord = request.get("coord")
-            return {"possible_positions": self.games[game_id]["game"].possible_move_positions_from_piece(coord)}
+            return {"possible_positions": self.games[game_id]["game"].possible_move_positions_for_piece(coord)}
 
     def _get_current_game_id(self, auth_string):
         for game in self.games:
@@ -271,17 +272,23 @@ class Server():
         """
         session_auth = request.get("session_auth")
         game_id = self._get_current_game_id(session_auth)
-        if type(game_id) == int:
+        if type(game_id) != int:
             return {"error": "User not in a game."}
         else:
             colour = request.get("colour")
             return {"previous_moves": self.games[game_id]["game"].get_previous_moves(colour)}
 
     def _get_algebraic_notation_route(self, request):
+        print("geting algebraic_notation")
         game_id = self._get_current_game_id(request.get("session_auth"))
         if type(game_id) != int:
             return {"error": "User not in a game."}
         else:
             pos_from = request.get("pos_from")
             pos_to = request.get("pos_to")
-            return {"algebraic_notation": self.games[game_id]["game"].get_algebraic_notation(pos_from, pos_to)}
+            print({"algebraic_notation": self.games[game_id]["game"].get_algebraic_notation(
+                pos_from, pos_to)})
+            if self.games[game_id]["game"].get_algebraic_notation(pos_from, pos_to):
+                return {"algebraic_notation": self.games[game_id]["game"].get_algebraic_notation(pos_from, pos_to)}
+            else:
+                return {"error": "invalid move"}

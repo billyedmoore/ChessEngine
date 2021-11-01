@@ -40,7 +40,7 @@ class AIPlayer(Player.BasePlayer):
             int beta - the maximum score
         """
 
-        # inspiration - https://www.cs.cornell.edu/courses/cs312/2002sp/lectures/rec21.htm
+        # inspiration - https://www.cs.cornell.edu/courses/cs312/2002sp/lectures/rec21.html
         if depth == 0:
             return Evaluation.evaluate(gamestate)
 

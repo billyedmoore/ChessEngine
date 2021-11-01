@@ -1,6 +1,7 @@
 class OnlineGame:
 
     def __init__(self, app):
+        self.app = app
         self.game_id = app.client.join_game()
 
     @property
@@ -15,7 +16,7 @@ class OnlineGame:
         return self.app.client.get_legal_moves()
 
     def possible_move_positions_for_piece(self, coord):
-        return self.app.client.possible_move_positions_for_piece()
+        return self.app.client.possible_move_positions_for_piece(coord)
 
     def get_previous_moves(self, colour):
         return self.app.client.get_previous_moves(colour)
@@ -24,7 +25,8 @@ class OnlineGame:
         return self.app.client.get_one_colour_board(colour)
 
     def tick(self):
-        return self.app.client.tick()
+        pass
+        # return self.app.client.tick()
 
     def make_move(self, move):
         return self.app.client.make_move(move)
