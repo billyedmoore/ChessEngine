@@ -4,19 +4,22 @@ from . import TextBox, Button
 
 
 class LoginScreen(pygame.Surface):
-
     def __init__(self, app, w, h):
         pygame.Surface.__init__(self, size=(w, h))
         self.surface = app.screen
         self.app = app
         self.elements = [
-            TextBox.TextBox(self, w/2, h/8, w/4, (h/64)*17,
-                            placeholder_text="username",text="billyedmoore"),
+            TextBox.TextBox(self, w/2, h/8, w/4, (h/64)*7,
+                            placeholder_text="username", text="billyedmoore"),
             TextBox.TextBox(self, w/2, h/8, (w/4), (h/64)
-                            * 27, text_hidden=True, placeholder_text="password", text="password"),
+                            * 17, text_hidden=True, placeholder_text="password", text="password"),
             Button.Button(self, w/3, h/8, (w/4) +
-                          1/2*(w/2-w/3), (h/64)*39, text="Login",
-                          on_click=lambda:self.login_attempt(self.elements[0].text, self.elements[1].text))
+                          1/2*(w/2-w/3), (h/64)*29, text="Login",
+                          on_click=lambda:self.login_attempt(self.elements[0].text, self.elements[1].text)),
+            Button.Button(self, w/3, h/8, (w/4) + 1/2 *
+                          (w/2-w/3), (h/64)*42, text="Register",
+                          on_click=lambda:self.app.open_registration_screen())
+
         ]
 
     def handle_event(self, event):
@@ -28,6 +31,9 @@ class LoginScreen(pygame.Surface):
 
         if user:
             self.app.handle_login(user)
+
+    def load_register_screen(self):
+        print("That dont exist you knob")
 
     def tick(self):
         pass

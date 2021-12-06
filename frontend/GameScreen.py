@@ -97,13 +97,16 @@ class Board(pygame.Surface):
 
     def draw_squares(self):
         x_names = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        y_names = [str(num) for num in range(1, 9)]
         square_width = self.get_width() // 8
         colour_bit = True
         for x in range(8):
             colour_bit = not colour_bit
-            text = self.app.font.render(
+            x_text = self.app.font.render(
                 x_names[x], 1, (self.black_colour if colour_bit else self.white_colour))
             for y in range(8):
+                y_text = self.app.font.render(
+                    y_names[y], 1, (self.black_colour if colour_bit else self.white_colour))
                 if (x, y) in self.possible_moves:
                     col = self.white_selected_colour if colour_bit else self.black_selected_colour
                 else:
@@ -111,7 +114,11 @@ class Board(pygame.Surface):
                 pygame.draw.rect(self, col,
                                  (x * square_width, y * square_width, square_width, square_width))
                 colour_bit = not colour_bit
-            self.blit(text, (x * square_width, 0))
+                self.blit(y_text, (square_width*8 -
+                                   (y_text.get_width()), y*square_width))
+                self.blit(y_text, (square_width*1 -
+                                   (y_text.get_width()), y*square_width))
+            self.blit(x_text, (x * square_width, 0))
 
     def tick(self):
         # TODO: make this async so that it dont block the drawing

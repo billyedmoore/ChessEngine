@@ -1,4 +1,4 @@
-from . import LoginScreen, MenuScreen
+from . import LoginScreen, MenuScreen, RegistationScreen
 from client_side.Client import Client
 import pygame
 from pygame.locals import *
@@ -50,6 +50,10 @@ class App:
         menuscreen = MenuScreen.MenuScreen(
             self, self.screen_res[0], self.screen_res[1])
         self.current_screen = menuscreen
+
+    def open_registration_screen(self):
+        self.current_screen = RegistationScreen.RegistrationScreen(
+            self, self.screen_res[0], self.screen_res[1])
 
     def start_game(self, game_screen):
         self.in_game = True

@@ -64,8 +64,72 @@ class User():
         db = Database()
         if db_name:
             db = Database(db_name=db_name)
+
         user_id = db.insert_user(username, email, pass_hash, salt, elo=elo)
         return User(user_id, username, email, password, db_name=db_name)
+
+    @staticmethod
+    def is_valid_user(username, email, password):
+        """
+        Checks that a user is valid accoring to the rules layed out in the
+        design of the program
+
+        Parameters:
+            string email    - the email to test
+            string username - the username to test
+            string password - the password to test
+
+        Return Values:
+            bool is_valid - wether the email username and pasword provided are 
+                            all in accordance with the rules
+        """
+        return (User.is_valid_password(password) and
+                User.is_valid_username(username) and
+                User.is_valid_email(email))
+
+    @staticmethod
+    def is_valid_password(password):
+        """
+        Checks that the password is bettween 10 and 30 characters in length as
+        specified in design
+
+        Parameters:
+            string password - the password to test
+
+        Return Values:
+            bool is_valid - wether or not the password is acceptable
+        """
+        return (isinstance(password, str) and len(password) >= 10 and len(password) <= 30)
+
+    @staticmethod
+    def is_valid_email(email):
+        """
+        Checks that an email is approximatly valid, this isn't ideal because
+        it gives no guarentee that the user has the email.
+
+        Parameters:
+            string email - the email to test
+
+        Return Values:
+            bool is_valid - wether or not the email is valid
+        """
+        # heavily inpired by https://www.geeksforgeeks.org/check-if-email-address-valid-or-not-in-python/
+        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        return bool(re.fullmatch(email_regex, email))
+
+    @staticmethod
+    def is_valid_username(username):
+        """
+        Checks that a username is less that 15 characters in length so that it
+        can be used as specified in the design stage
+
+        Parameters:
+            string username
+
+        Return Values:
+            bool is_valid - wether or not the password is acceptable
+        """
+        return (isinstance(username, str) and len(username) >= 15)
 
     @staticmethod
     def hash_password(password: str, salt=b""):
@@ -86,19 +150,3 @@ class User():
         pass_hash = hashlib.pbkdf2_hmac(
             "sha256", password.encode("utf_8"), salt, 1000000)
         return pass_hash, salt
-
-    @staticmethod
-    def is_valid_email(email):
-        """
-        Checks that an email is approximatly valid, this isn't ideal because
-        it gives no guarentee that the user has the email.
-
-        Parameters:
-            string email - the email to test
-
-        Return Values:
-            bool is_valid - wether or not the email is valid
-        """
-        # heavily inpired by https://www.geeksforgeeks.org/check-if-email-address-valid-or-not-in-python/
-        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
-        return bool(re.fullmatch(email_regex, email))

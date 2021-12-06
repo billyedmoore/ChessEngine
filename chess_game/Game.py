@@ -116,8 +116,9 @@ class Game:
             move = player_to_play.get_next_move()
             self._gamestate.make_move(move)
 
-    def make_move(self, algebraic_move):
-        colour_playing = self.gamestate.player_to_play
+    def make_move(self, algebraic_move, colour_playing=None):
+        if not colour_playing or colour_playing.lower() not in ["w", "b"]:
+            colour_playing = self.gamestate.player_to_play
         move = Move.from_algebraic_notation(
             self.gamestate, colour_playing, algebraic_move)
         if move:

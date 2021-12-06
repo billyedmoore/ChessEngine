@@ -37,7 +37,7 @@ class Server():
         self.server.listen()
         while self.listening:
             conn, addr = self.server.accept()
-            print(f"Accepted connection from {addr}")
+            # print(f"Accepted connection from {addr}")
             request = conn.recv(4096)
             if not request:
                 break
@@ -66,15 +66,15 @@ class Server():
         return (colour.lower() in ["w", "b"])
 
     def _handle_request(self, request):
-        print(request)
+        print("Reuqest made", request)
         if request.get("type") == "game":
-            print("game request")
+            # print("game request")
             response = self._handle_game_request(request)
-            print(response)
         elif request.get("type") == "user":
-            print("user request")
+            # print("user request")
             response = self._handle_user_request(request)
 
+        print("Responded", response)
         return response
 
     def _handle_user_request(self, request):
@@ -96,6 +96,16 @@ class Server():
             return {"error": "Invalid session_auth"}
         if request.get("request") == "get_user":
             return self._get_user_route(request)
+
+    def _create_user_route(self, request):
+        # requests should contain the following arguments
+        #       username
+        #       email
+        #       password
+
+        username = request.get("username")
+        email = request.get("email")
+        password = request.get("password")
 
     def _user_login_route(self, request):
         def get_random_string(length=10):
@@ -177,13 +187,19 @@ class Server():
         """
         game_id = self._get_current_game_id(request.get("session_auth"))
         if game_id in range(len(self.games)):
-            return {"error": f"Already in game {game_id}", "game_id": game_id}
+            return {"error": f"Already in game {game_id}.", "game_id": game_id}
         elif len(self.matching_queue) == 0:
             self.matching_queue.append(request.get("session_auth"))
             return {"string": "number"}
+        elif request.get("session_auth") in self.matching_queue:
+            return {"error": f"Waiting for a player to play."}
         else:
             game = Game(None, None)
             index = len(self.games)
+            print("new game", {"w": request.get("session_auth"),
+                               "b": self.matching_queue[0],
+                               "game": game,
+                               "last_player": "b"})
             self.games.append({"w": request.get("session_auth"),
                                "b": self.matching_queue[0],
                                "game": game,
@@ -214,8 +230,17 @@ class Server():
         if type(game_id) != int:
             return {"error": "User not in a game."}
         else:
+            # gets the colour by session_auth
+            colour_playing = list(self.games[game_id].keys(
+            ))[list(self.games[game_id].values()).index(request.get("session_auth"))]
+            if colour_playing.lower() != self.games[game_id]["game"].player_to_play.lower():
+                return {"made_move": False}
+            print(self.games[game_id])
             move = request.get("move")
-            return {"made_move": self.games[game_id]["game"].make_move(move)}
+            return {"made_move":
+                    self.games[game_id]["game"].make_move(move, colour_playing=colour_playing)}
+        print(f"made the move {move} or at least tryed ig")
+        self.games[game_id]["game"].print()
 
     def _is_game_over_route(self, request):
         game_id = self._get_current_game_id(request.get("session_auth"))
@@ -286,8 +311,8 @@ class Server():
         else:
             pos_from = request.get("pos_from")
             pos_to = request.get("pos_to")
-            print({"algebraic_notation": self.games[game_id]["game"].get_algebraic_notation(
-                pos_from, pos_to)})
+            # print({"algebraic_notation": self.games[game_id]["game"].get_algebraic_notation(
+            # pos_from, pos_to)})
             if self.games[game_id]["game"].get_algebraic_notation(pos_from, pos_to):
                 return {"algebraic_notation": self.games[game_id]["game"].get_algebraic_notation(pos_from, pos_to)}
             else:

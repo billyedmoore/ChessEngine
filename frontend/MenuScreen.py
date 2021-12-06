@@ -21,7 +21,7 @@ class MenuScreen(pygame.Surface):
 
                         Button(self, button_pos[2][0], button_pos[2][1], button_pos[2][2], button_pos[2][3],
                                text="Online Multiplayer",
-                               on_click=lambda: app.start_game(GameScreen(app, w, h,online=True)))]
+                               on_click=lambda: app.start_game(GameScreen(app, w, h, online=True)))]
 
     @staticmethod
     def get_button_pos(num_buttons, w, h):
