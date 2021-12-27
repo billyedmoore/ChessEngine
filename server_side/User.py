@@ -58,9 +58,10 @@ class User():
         # TODO: hashing
         details = db.get_user_details(username)
         if details:
-            print(details)
+            # print(details)
             user = User(details[0], details[1], details[2],
                         password, elo=details[5])
+            # print(user)
             return (user if user.is_auth() else None)
         else:
             return None

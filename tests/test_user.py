@@ -4,7 +4,6 @@ import os
 
 
 class TestUserMethods(unittest.TestCase):
-
     def test_hash_password(self):
         """
         Create a user and test weather they are authorised by checking their
@@ -16,8 +15,8 @@ class TestUserMethods(unittest.TestCase):
 
         user = User.User.create_user(
             "billyedmoore", "billy@email.com", "password", db_name="test.db")
-        self.assertTrue(User.User.get_user(
-            "billyedmoore", "password").is_auth())
+        self.assertTrue(bool(User.User.get_user(
+            "billyedmoore", "password")))
 
         os.system("rm -rf test.db")
         os.system("del /f test.db")
