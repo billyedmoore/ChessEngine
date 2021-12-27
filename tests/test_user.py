@@ -16,7 +16,7 @@ class TestUserMethods(unittest.TestCase):
 
         user = User.User.create_user(
             "billyedmoore", "billy@email.com", "password", db_name="test.db")
-        self.assertTrue(user.is_auth())
+        self.assertTrue(user.get_user("billyedmoore", "password").is_auth())
 
         os.system("rm -rf test.db")
         os.system("del /f test.db")
