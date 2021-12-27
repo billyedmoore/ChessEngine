@@ -4,16 +4,19 @@ from pygame.locals import *
 
 class Button(pygame.Surface):
     def __init__(self, surface, w, h, x, y, text="Hello World!",
-                 inactive_colour=(80, 80, 80), hover_colour=(65, 65, 65),
+                 inactive_colour=(166, 166, 166), hover_colour=(65, 65, 65),
                  font=None,
+                 text_centered=False,
                  on_click=lambda: print("Button Pressed!")):
         self.hover = False
         self.text = text
-        self.font = font if font else pygame.font.SysFont("freemono", 20)
+        self.font = font if font else pygame.font.SysFont("freemono", 30)
         self.on_click = on_click
         self.hover_colour = hover_colour
         self.inactive_colour = inactive_colour
         self.surface = surface
+        self.w = w
+        self.h = h
         self.x = x
         self.y = y
         pygame.Surface.__init__(self, size=(w, h))
@@ -23,7 +26,8 @@ class Button(pygame.Surface):
         colour = self.hover_colour if self.hover else self.inactive_colour
         self.fill(colour)
         text = self.font.render(self.text, 1, (255, 255, 255))
-        self.blit(text, (10, 10))
+        text_rect = text.get_rect(center=(self.w/2, self.h/2))
+        self.blit(text, text_rect)
         self.surface.blit(self, (self.x, self.y))
 
     def handle_event(self, event):

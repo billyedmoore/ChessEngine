@@ -1,4 +1,5 @@
 from .Database import Database
+from sqlite3 import IntegrityError
 import os
 import re
 import hashlib
@@ -13,10 +14,27 @@ class User():
         self.db_name = db_name
         self.db = Database(db_name=self.db_name)
         self.id = user_id
-        self.username = username
+        self.username = username.lower()
         self.email = email
         self.password = password
-        self.elo = elo
+        self._elo = elo
+
+    @property
+    def elo(self):
+        # prevents the setting of elo without changing the db
+        return self._elo
+
+    @elo.setter
+    def elo(self, elo):
+        if not isinstance(elo, int) and not isinstance(elo, float):
+            print("Cant set elo to :", elo)
+            raise TypeError("ELO must be an integer")
+        else:
+            # update in db
+            self.db.update_elo(self.id, elo)
+
+            # if added succesfully change locally on the class
+            self._elo = elo
 
     def is_auth(self):
         """
@@ -50,7 +68,7 @@ class User():
     @staticmethod
     def create_user(username: str, email: str, password: str, elo=1500, db_name=""):
         """
-        Append a user to the database and return their user object.
+        Append a user to the database and return a boolean value.
 
         Parameters:
             string username - the users username
@@ -65,8 +83,15 @@ class User():
         if db_name:
             db = Database(db_name=db_name)
 
-        user_id = db.insert_user(username, email, pass_hash, salt, elo=elo)
-        return User(user_id, username, email, password, db_name=db_name)
+        try:
+            user_id = db.insert_user(
+                username.lower(), email, pass_hash, salt, elo=elo)
+            if user_id:
+                return True
+        except IntegrityError:
+            return False
+
+        # return User(user_id, username, email, password, db_name=db_name)
 
     @staticmethod
     def is_valid_user(username, email, password):
@@ -83,9 +108,14 @@ class User():
             bool is_valid - wether the email username and pasword provided are 
                             all in accordance with the rules
         """
-        return (User.is_valid_password(password) and
-                User.is_valid_username(username) and
-                User.is_valid_email(email))
+        if not User.is_valid_password(password):
+            return (False, "password")
+        elif not User.is_valid_username(username):
+            return (False, "username")
+        elif not User.is_valid_email(email):
+            return (False, "email")
+        else:
+            return (True, "")
 
     @staticmethod
     def is_valid_password(password):
@@ -129,7 +159,7 @@ class User():
         Return Values:
             bool is_valid - wether or not the password is acceptable
         """
-        return (isinstance(username, str) and len(username) >= 15)
+        return (isinstance(username, str) and len(username) <= 15)
 
     @staticmethod
     def hash_password(password: str, salt=b""):

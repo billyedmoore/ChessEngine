@@ -9,15 +9,17 @@ class LoginScreen(pygame.Surface):
         self.surface = app.screen
         self.app = app
         self.elements = [
-            TextBox.TextBox(self, w/2, h/8, w/4, (h/64)*7,
+            TextBox.TextBox(self, w/2, h/7, (w/4), (h/49)*7,
                             placeholder_text="username", text="billyedmoore"),
-            TextBox.TextBox(self, w/2, h/8, (w/4), (h/64)
-                            * 17, text_hidden=True, placeholder_text="password", text="password"),
-            Button.Button(self, w/3, h/8, (w/4) +
-                          1/2*(w/2-w/3), (h/64)*29, text="Login",
+            TextBox.TextBox(self, w/2, h/7, (w/4), (h/49)*16,
+                            text_hidden=True, placeholder_text="password",
+                            text="password"),
+            # , text="password"),
+            Button.Button(self, w/3, h/7, (w/4) +
+                          1/2*(w/2-w/3), (h/49)*26, text="login",
                           on_click=lambda:self.login_attempt(self.elements[0].text, self.elements[1].text)),
-            Button.Button(self, w/3, h/8, (w/4) + 1/2 *
-                          (w/2-w/3), (h/64)*42, text="Register",
+            Button.Button(self, w/3, h/7, (w/4) + 1/2 *
+                          (w/2-w/3), (h/49)*35, text="register",
                           on_click=lambda:self.app.open_registration_screen())
 
         ]
@@ -31,6 +33,9 @@ class LoginScreen(pygame.Surface):
 
         if user:
             self.app.handle_login(user)
+        else:
+            self.elements[0].set_error(True)
+            self.elements[1].set_error(True)
 
     def load_register_screen(self):
         print("That dont exist you knob")
@@ -40,5 +45,5 @@ class LoginScreen(pygame.Surface):
 
     def draw(self):
         self.surface.blit(self, (0, 0))
-        self.fill((20, 20, 20))
+        self.fill((255, 255, 255))
         [elem.draw() for elem in self.elements]

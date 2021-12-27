@@ -4,25 +4,34 @@ from pygame.locals import *
 
 class TextBox(pygame.Surface):
 
-    def __init__(self, surface, w, h, x, y, placeholder_text="", font=None,text="",
-                 active_colour=(230, 230, 230), inactive_colour=(40, 40, 40),
+    def __init__(self, surface, w, h, x, y, placeholder_text="",
+                 font=None, text="", active_colour=(204, 204, 204),
+                 inactive_colour=(102, 102, 102),
+                 error_active_colour=(238, 75, 43),
+                 error_inactive_colour=(232, 138, 138),
                  text_hidden=False):
         pygame.Surface.__init__(self, size=(w, h))
+        self.error = False
         self.w = w
         self.h = h
         self.x = x
         self.y = y
         self.placeholder_text = placeholder_text
         self.surface = surface
-        self.font = font if font else pygame.font.SysFont("freemono", 20)
+        self.font = font if font else pygame.font.SysFont("freemono", 30)
         self.text = text
         self.text_hidden = text_hidden
         self.text_surface = self.font.render(
             (self.text if not self.text_hidden else ("*"*len(self.text))), 1, (0, 0, 0))
         self.active_colour = active_colour
         self.inactive_colour = inactive_colour
+        self.error_active_colour = error_active_colour
+        self.error_inactive_colour = error_inactive_colour
 
         self.active = False
+
+    def set_error(self, error: bool):
+        self.error = error
 
     def handle_event(self, event):
         if event.type == MOUSEBUTTONDOWN:
@@ -41,7 +50,9 @@ class TextBox(pygame.Surface):
                 (self.text if not self.text_hidden else ("*"*len(self.text))), 1, (0, 0, 0))
 
     def draw(self):
-        colour = self.active_colour if self.active else self.inactive_colour
+        active = self.error_active_colour if self.error else self.active_colour
+        inactive = self.error_inactive_colour if self.error else self.inactive_colour
+        colour = active if self.active else inactive
         self.surface.blit(self, (self.x, self.y))
         self.fill(colour)
         if not self.text:

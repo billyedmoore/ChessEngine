@@ -137,6 +137,7 @@ class Game:
         info = colour_info[self.player_to_play.upper()]
         special_moves = special_moves[self.player_to_play.lower()]
         try:
+            print(tuple(pos_from), tuple(pos_to))
             move = special_moves[(tuple(pos_from), tuple(pos_to))]
             return move
         except KeyError as e:

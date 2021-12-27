@@ -3,6 +3,13 @@ import sqlite3
 
 
 class Database():
+    """
+    Interface with the database directly.
+    Shouldn't perform validation at this level as these methods should only
+    be called with valid values for example these methods woudldn't prevent
+    you having a character below 10 characters in length.
+    """
+
     def __init__(self, reset=False, db_name="user.db"):
         self.db_name = db_name
         if reset:
@@ -67,6 +74,10 @@ class Database():
         else:
             print(f"No hash with the username {username}")
             return None, None
+
+    def update_elo(self, user_id, new_elo):
+        sql = "UPDATE User SET ELO=? WHERE UserId=?"
+        self._sql_query(sql, data=(new_elo, user_id))
 
     def insert_user(self, username, email, pass_hash, salt, elo=1500):
         """

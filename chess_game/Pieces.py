@@ -167,10 +167,12 @@ class Pawn(Piece):
             "W": {"start_row": 6, "end_row": 0, "direction": -1}}
 
         info = colour_info[self.colour.upper()]
+        other_colour_info = colour_info["B" if self.colour.upper(
+        ) == "W" else "W"]
         if self.position[1] == info["start_row"]:
             move_to = (self.position[0], self.position[1] +
                        (2*info["direction"]))
-            if game_state.square_exists(move_to):
+            if game_state.square_exists(move_to) and game_state.square_is_empty(move_to):
                 legal_moves.append(
                     Move.Move(game_state, self.position, move_to))
 
@@ -200,14 +202,25 @@ class Pawn(Piece):
             print("We should never get here")
 
         # en-passant
-        if self.position[1] == info["start_row"]+(2*info["direction"]):
+        if self.position[1] == other_colour_info["start_row"]+(2*other_colour_info["direction"]):
+            # print(self.colour, self.position, other_colour_info)
             directions = [+1, -1]
-            for direction in directions:
+            for direction in directions:  # for left and right
                 potential_pos = (self.position[0]+direction, self.position[1])
+
+                # if there is a piece in the pos horizontal and the square horizontal exists
                 if not game_state.square_is_empty(potential_pos) and game_state.square_exists(potential_pos):
-                    if not game_state.get_square(potential_pos).get_piece().colour.lower() == self.colour.lower():
+                    # get the piece in this square
+                    piece = game_state.get_square(potential_pos).get_piece()
+                    # if the piece is of the opposing colour and its a pawn and it has only moved once
+                    if piece.colour.lower() != self.colour.lower() and piece.letter.lower() == "p" and piece.move_count == 1:
+                        # TODO: Only when the piece has just moved but not sure I have the ground work layed for this
                         legal_moves.append(
-                            Move.Move(game_state, self.position, (self.position[0]+direction, self.position[1])))
+                            Move.Move(game_state,
+                                      self.position,
+                                      (self.position[0]+direction,
+                                       self.position[1]+info["direction"]),
+                                      en_passant=potential_pos))
 
         return legal_moves
 

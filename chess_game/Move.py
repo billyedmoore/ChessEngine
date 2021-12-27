@@ -172,8 +172,9 @@ class Move(BaseMove):
     # set to the piece captured in this move if one is to allow move to be undone
     _captured_piece = None
 
-    def __init__(self, gamestate, from_pos, to_pos):
+    def __init__(self, gamestate, from_pos, to_pos, en_passant=None):
         super().__init__(gamestate)
+        self.en_passant = en_passant
         self._position_from = from_pos
         self._position_to = to_pos
         self.moving_piece = self._gamestate.get_square(
@@ -204,17 +205,24 @@ class Move(BaseMove):
     def perform(self):
         square_from = self._gamestate.get_square(self.position_from)
         square_to = self._gamestate.get_square(self.position_to)
+        move_to = square_to
+        if self.en_passant:
+            print("making enpassant move")
+            square_to = self.gamestate.get_square(self.en_passant)
         piece = square_from.pop_piece()
         if not self._gamestate.square_is_empty(square_to.position):
             captured_piece = square_to.pop_piece()
             self._captured_piece = (captured_piece)
-        piece.make_move(square_to.position)
-        square_to.set_piece(piece)
+        piece.make_move(move_to.position)
+        move_to.set_piece(piece)
 
     def _unperform(self):
         square_from = self.get_square(self.position_from)
         square_to = self.get_square(self.position_to)
         piece = square_to.pop_piece()
+        if self.en_passant:
+            en_passant = self.get_square(self.en_passant)
+            en_passant.set_piece(self.captured)
         if self.captured:
             square_to.set_piece(self.captured)
         piece.forget_move()

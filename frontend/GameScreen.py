@@ -18,6 +18,7 @@ class Board(pygame.Surface):
 
         self._from_pos = None
         self.app = app
+        self.online = online
         self.x = x
         self.y = y
         self.square_width = total_side_length // 8
@@ -71,8 +72,14 @@ class Board(pygame.Surface):
             self.possible_moves = []
 
     def update_sprites(self):
+        """
+        Update the position/existance of piece sprites based on the 
+        "one_colour_board" from the Game/OnlineGame object
+        """
         white_piece_things = self.game.get_one_colour_board("w")
         black_piece_things = self.game.get_one_colour_board("b")
+        if not white_piece_things or not black_piece_things:
+            return
         for x in range(8):
             for y in range(8):
                 if white_piece_things[x][y]:
@@ -97,7 +104,7 @@ class Board(pygame.Surface):
 
     def draw_squares(self):
         x_names = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        y_names = [str(num) for num in range(1, 9)]
+        y_names = [str(num) for num in range(8, 0, -1)]
         square_width = self.get_width() // 8
         colour_bit = True
         for x in range(8):
@@ -116,22 +123,46 @@ class Board(pygame.Surface):
                 colour_bit = not colour_bit
                 self.blit(y_text, (square_width*8 -
                                    (y_text.get_width()), y*square_width))
-                self.blit(y_text, (square_width*1 -
-                                   (y_text.get_width()), y*square_width))
+                # self.blit(y_text, (square_width*1 -
+                                   # (y_text.get_width()), y*square_width))
             self.blit(x_text, (x * square_width, 0))
 
     def tick(self):
         # TODO: make this async so that it dont block the drawing
-        if not self.game.is_game_over:
+        game_over = self.game.is_game_over
+        if not game_over:
             thread = threading.Thread(target=self.game.tick)
             thread.start()
-        self.update_sprites()
-        self.draw()
+            self.update_sprites()
+        else:
+            if game_over == "d":
+                body = ["Thats a stalemate my friend.",
+                        "Press any key to return to the menu."]
+                self.app.open_game_over_screen(body=body)
+            elif self.online:
+                if game_over == self.game.colour_controlled:
+                    body = ["You win, lets go.",
+                            "Press any key to return to the menu."]
+                    self.app.open_game_over_screen(body=body)
+                else:
+                    body = ["You lose, better luck next time.",
+                            "Press any key to return to the menu."]
+                    self.app.open_game_over_screen(body=body)
+            elif game_over == "w":
+                body = ["White wins, congats.",
+                        "Press any key to return to the menu."]
+                self.app.open_game_over_screen(body=body)
+            elif game_over == "b":
+                body = ["Black wins, congats.",
+                        "Press any key to return to the menu."]
+                self.app.open_game_over_screen()
+
         if not self.game.is_game_over:
             thread.join()
 
     def draw(self):
-        self.parent_surface.blit(self, (self.x, self.y))
+        self.parent_surface.blit(self,
+                                 (self.x, self.y))
         self.draw_squares()
         self.white_pieces.update()
         self.black_pieces.update()
@@ -169,8 +200,13 @@ class MoveTable(pygame.Surface):
             w, h))
         self.app = app
         self.game = game
+        self.online = getattr(game,"online",False)
         self.black_colour = black_colour
         self.white_colour = white_colour
+        self.big_font = pygame.font.SysFont(
+                "freemono", 23)
+        self.small_font = pygame.font.SysFont(
+                "freemono", 25)
         self.w = w
         self.h = h
         self.x = x
@@ -181,22 +217,73 @@ class MoveTable(pygame.Surface):
         pass
 
     def draw(self):
-        self.white_moves = self.game.get_previous_moves("w")[-10:]
-        self.black_moves = self.game.get_previous_moves("b")[-10:]
-        self.parent_surface.blit(self, (self.x, self.y))
-        pygame.draw.rect(self, self.white_colour, (0, 0, self.w / 2, self.h))
+        prev_w_moves = self.game.get_previous_moves("w")
+        prev_b_moves = self.game.get_previous_moves("b")
+        if (not isinstance(prev_w_moves,list)
+                or not isinstance(prev_b_moves,list)):
+            return
+        if len(prev_w_moves) > len(prev_b_moves):
+            self.white_moves=prev_w_moves[-13:]
+            self.black_moves=prev_b_moves[-12:]
+        else:
+            self.white_moves=prev_w_moves[-13:]
+            self.black_moves=prev_b_moves[-13:]
+
+        # Draw the "black" and "white" titles and the background for them
+        if self.online:
+            if self.game.colour_controlled.lower() == "w":
+                white_text = "white(you)"
+                black_text = "black"
+            else:
+                white_text = "white"
+                black_text = "black(you)"
+        else:
+            white_text = "white"
+            black_text = "black"
+
+        white_title=self.big_font.render(white_text, 1, (255, 255, 255))
+        black_title=self.big_font.render(black_text, 1, (255, 255, 255))
+        header_height=white_title.get_height()*2.5
+        w_rect=white_title.get_rect(
+            center=(self.w/4, (header_height)/2))
+        b_rect=black_title.get_rect(
+            center=(self.w*3/4, (header_height)/2))
+        pygame.draw.rect(self, self.white_colour,
+                         (self.w / 2, 0,
+                             self.w / 2, header_height))
         pygame.draw.rect(self, self.black_colour,
-                         (self.w / 2, 0, self.w / 2, self.h))
+                         (0, 0,
+                             self.w / 2, header_height))
+        self.blit(white_title, w_rect)
+        self.blit(black_title, b_rect)
+
+        # Draw the backgrounds for the rest of the moves
+        pygame.draw.rect(self, self.white_colour,
+                         (0, header_height,
+                          self.w / 2, self.h))
+        pygame.draw.rect(self, self.black_colour,
+                         (self.w / 2, header_height,
+                          self.w / 2, self.h))
         # self.fill((90, 90, 90))
-        text_height = 30
+        text_height=30
         for move in range(len(self.white_moves)):
-            text = self.app.font.render(
-                self.white_moves[move], 0.5, (255, 255, 255))
-            self.blit(text, (0, text_height * move))
+            text=self.small_font.render(
+                self.white_moves[move], 1, (255, 255, 255))
+            text_rect=text.get_rect(
+                center=(self.w/4,
+                        (text_height * move) +
+                        header_height + 1/2*(text.get_height())))
+            self.blit(text, text_rect)
         for move in range(len(self.black_moves)):
-            text = self.app.font.render(
+            text=self.small_font.render(
                 self.black_moves[move], 1, (255, 255, 255))
-            self.blit(text, (self.w / 2, text_height * move))
+            text_rect=text.get_rect(
+                center=(self.w*3/4,
+                        (text_height * move) +
+                        header_height + 1/2*(text.get_height())))
+            self.blit(text, text_rect)
+
+        self.parent_surface.blit(self, (self.x, self.y))
 
     def handle_event(self, event):
         pass
@@ -209,14 +296,14 @@ class GameScreen(pygame.Surface):
 
     def __init__(self, app, w, h, white_player=None, black_player=None, online=False):
         pygame.Surface.__init__((self), size=(w, h))
-        self.surface = app.screen  # surface refers to parent surface
-        remaining_width = (h - h / 4)
-        menu_screen_x = ((w - remaining_width) - w / 2)
-        self.board = Board(app, self, remaining_width, h / 20, w / 2,
+        self.surface=app.screen  # surface refers to parent surface
+        remaining_width=(h - h / 4)
+        menu_screen_x=((w - remaining_width) - w / 2)
+        self.board=Board(app, self, remaining_width, h / 20, w / 2,
                            white_player=white_player, black_player=black_player, online=online)
-        self.move_table = MoveTable(
+        self.move_table=MoveTable(
             app, self, menu_screen_x, h / 20, remaining_width - (1.5 * (menu_screen_x)), w / 2, self.board.game)
-        self.fill((20, 20, 20))
+        self.fill((255, 255, 255))
 
     def draw(self):
         self.board.draw()

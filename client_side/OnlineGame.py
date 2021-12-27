@@ -2,11 +2,12 @@ class OnlineGame:
 
     def __init__(self, app):
         self.app = app
-        self.game_id = app.client.join_game()
+        self.online = True
+        self.game_id, self.colour_controlled = app.client.join_game()
 
     @property
     def is_game_over(self):
-        return self.app.client.is_game_over()
+        return self.app.client.is_game_over(self.game_id)
 
     @property
     def player_to_play(self):
