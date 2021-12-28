@@ -83,10 +83,10 @@ class Board(pygame.Surface):
         for x in range(8):
             for y in range(8):
                 if white_piece_things[x][y]:
-                    piece = [p for p in self.white_pieces.sprites() if p.number ==
-                             white_piece_things[x][y][1]][0]
+                    piece = [p for p in self.white_pieces.sprites() 
+                            if p.number == white_piece_things[x][y][1]][0]
                     piece.pos = (x, y)
-                    # piece.letter = white_piece_things[0]
+                    piece.piece_letter = white_piece_things[x][y][0]
 
                 elif black_piece_things[x][y]:
                     piece = [p for p in self.black_pieces.sprites() if p.number ==

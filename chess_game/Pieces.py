@@ -213,8 +213,10 @@ class Pawn(Piece):
                     # get the piece in this square
                     piece = game_state.get_square(potential_pos).get_piece()
                     # if the piece is of the opposing colour and its a pawn and it has only moved once
-                    if piece.colour.lower() != self.colour.lower() and piece.letter.lower() == "p" and piece.move_count == 1:
-                        # TODO: Only when the piece has just moved but not sure I have the ground work layed for this
+                    if (piece.colour.lower() != self.colour.lower() and
+                        piece.letter.lower() == "p" and piece.move_count == 1
+                        and getattr(game_state.moves.peek(), "position_to")
+                            == potential_pos):
                         legal_moves.append(
                             Move.Move(game_state,
                                       self.position,

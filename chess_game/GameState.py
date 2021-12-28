@@ -47,7 +47,7 @@ class MoveStack:
         """
         if len(self._moves) == 0:
             return None
-        return self._moves[len(self._moves) - 1]
+        return self._moves[-1]
 
 
 class GameState:
@@ -90,6 +90,10 @@ class GameState:
         copy._squares = [s.clone(copy) for s in squares]
         copy._moves = self._moves.clone()
         return copy
+
+    @property
+    def moves(self):
+        return self._moves
 
     @property
     def ply_count(self):
