@@ -17,7 +17,7 @@ class TestUserMethods(unittest.TestCase):
             "billyedmoore", "billy@email.com", "thisisalongpassword", db_name="test.db")
         # self.assertTrue(bool(User.User.get_user(
         # "billyedmoore", "thisisalongpassword", db_name="test.db")))
-        self.AssertTrue(True)
+        self.assertTrue(True)
 
         os.system("rm -rf test.db")
         os.system("del /f test.db")

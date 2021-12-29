@@ -27,12 +27,15 @@ class Game:
         Possible Return Values:
             "b" - black wins
             "w" - white wins
-            "d" - nobody wins
+            "d" - draw
             ""  - game is not over
         """
         # Other ways that the game can be over:
         # Threefold repetition - position repeated three times in a game
         # 50 move rule - no captures or pawn moves made in last 50 moves
+        stalemate = self.gamestate.stalemate()
+        if stalemate:
+            return "d"
         white_checkmate = self.gamestate.checkmate("w")
         black_checkmate = self.gamestate.checkmate("b")
         if white_checkmate and not black_checkmate:

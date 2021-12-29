@@ -145,10 +145,26 @@ class GameState:
         Returns a bool value repersenting wether the colour specified is in 
         checkmate
 
-        Parameters
+        Parameters:
             string colour - value from the set {"w","W","b","B"}
+        Return Value:
+            bool checkmate - whether or not the colour is in checkmate
         """
-        return(len(self.get_legal_moves(colour)) == 0)
+        return(len(self.get_legal_moves(colour)) == 0 and self.check(colour))
+
+    def stalemate(self) -> bool:
+        """
+        Returns a bool value repersenting whther the board is in checkmate
+
+        Return Value:
+            bool stalemate - whether or not the colour is in checkmate
+        """
+        for colour in ["w", "b"]:
+            if (len(self.get_legal_moves(colour)) == 0 and
+                    not self.check(colour)):
+                return True
+        else:
+            return False
 
     def get_legal_moves(self, colour: str, get_castling_moves=True):
         """
