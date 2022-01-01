@@ -81,6 +81,8 @@ class Client():
         print("server responded ", response)
         game_id = response.get("game_id")
         colour = response.get("colour")
+        colour = colour if colour else ""
+
 
         while not game_id:
             response = self._make_request(request)

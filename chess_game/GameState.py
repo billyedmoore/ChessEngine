@@ -18,7 +18,7 @@ class MoveStack:
         return cpy
 
     def get_moves(self):
-        return self._moves
+        return list(self._moves)
 
     @property
     def ply_count(self):
@@ -40,6 +40,9 @@ class MoveStack:
         value = self._moves[length - 1]
         del self._moves[length - 1]
         return value
+
+    def empty(self):
+        self._moves = []
 
     def peek(self):
         """
@@ -77,6 +80,9 @@ class GameState:
                                 generate a board of squares
 
         """
+        self._moves = MoveStack()
+        
+        print(len(self.moves.get_moves()))
         if fen_string:
             self._load_fen(fen_string)
 
@@ -116,7 +122,6 @@ class GameState:
             string colour - value from the set {"w","W","b","B"}
         """
         opposition_colour = ["B", "W"][["W", "B"].index(colour.upper())]
-        # TODO: handle no opposition_king on board
         try:
             opposition_king = [
                 s._piece for s in self._squares
@@ -290,11 +295,15 @@ class GameState:
         Play a move on the GameState
         """
         if move.gamestate != self:
-            raise Exception(f"cant make move with diffrent gamestate")
+            raise Exception(f"Can't make move with different gamestate")
         if check_legality and not move.is_legal_move():
             raise Exception(
                 f"Invalid Move {(move.position_from,move.position_to)}")
-        move.perform()
+
+        try:
+            move.perform()
+        except Exception as e:
+            print([m.print() for m in self.get_legal_moves("b")])
 
         self._moves.push(move)
         self._player_to_play = ["B", "W"][[

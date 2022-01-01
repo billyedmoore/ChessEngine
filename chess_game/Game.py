@@ -10,7 +10,8 @@ class Game:
     _white_player = None  # of type Player or None
     _black_player = None  # of type Player or None
 
-    def __init__(self, white_player, black_player, fen_string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
+    def __init__(self, white_player, black_player, 
+            fen_string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
         self._gamestate = GameState(fen_string=fen_string)
         if white_player:
             white_player.gamestate = self._gamestate
@@ -46,9 +47,17 @@ class Game:
             return "d"
         else:
             return ""
+    
+    @property
+    def black_player(self):
+        return self._black_player
 
     @property
-    def gamestate(self):
+    def white_player(self):
+        return self._white_player
+
+    @property 
+    def gamestate(self): 
         return self._gamestate
 
     @property
@@ -59,6 +68,7 @@ class Game:
     def gamestate(self, gamestate: GameState):
         if type(gamestate) == GameState:
             self._gamestate = gamestate
+            self._gamestate.moves.empty()
         else:
             raise TypeError("Not of type GameState")
 
@@ -86,7 +96,7 @@ class Game:
         Parameters
             str colour - value from the set {"w","W","b","B"}
         """
-        moves = self.gamestate.get_move_stack().get_moves()
+        moves = self.gamestate.moves.get_moves()
         if colour.lower() == "w":
             return [moves[i].to_algebraic_notation() for i in range(len(moves)) if i % 2 == 0]
 

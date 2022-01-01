@@ -82,8 +82,7 @@ class Piece:
 
     def get_legal_moves(self, game_state, get_castling_moves=True):
         moves = self._get_legal_moves(game_state)
-        if game_state.check(self.colour):
-            moves = self._remove_moves_that_dont_break_check(game_state, moves)
+        moves = self._remove_moves_that_dont_break_check(game_state, moves)
         return moves
 
     def get_pseudolegal_moves(self, game_state, get_castling_moves=True):
@@ -132,6 +131,8 @@ class Piece:
 
         legal_moves = []
         for move in moves:
+            if move.castling: # cant make a castling move when in check
+                continue
             mv_copy = move.clone()
             gs_copy = game_state.clone()
             mv_copy._gamestate = gs_copy
@@ -172,7 +173,12 @@ class Pawn(Piece):
         if self.position[1] == info["start_row"]:
             move_to = (self.position[0], self.position[1] +
                        (2*info["direction"]))
-            if game_state.square_exists(move_to) and game_state.square_is_empty(move_to):
+            jump_over = (self.position[0], self.position[1] +
+                       (1*info["direction"]))
+            if (game_state.square_exists(move_to) and 
+            game_state.square_is_empty(move_to) and
+            game_state.square_exists(jump_over) and 
+            game_state.square_is_empty(jump_over)):
                 legal_moves.append(
                     Move.Move(game_state, self.position, move_to))
 
@@ -279,7 +285,9 @@ class King(Piece):
         legal_moves = self._get_possible_moves(
             game_state, directions, max_range=2)
 
-        if self.move_count == 0 and get_castling_moves:
+        if (self.move_count == 0 and 
+         (self.position==(4,0) or self.position==(4,7)) 
+         and get_castling_moves):
             king_row = {"w": 7, "b": 0}
             y = king_row[self.colour.lower()]
             castling_positions = {(2, y): "q", (6, y): "k"}
@@ -294,7 +302,7 @@ class King(Piece):
                 side = castling_positions[move.position_to]
                 rook_pos = positions[side]["rook_pos"]
                 rook = game_state.get_square(rook_pos).get_piece()
-                if not rook or rook.move_count != 0:
+                if not rook or rook.letter.lower() != "r" or rook.move_count != 0:
                     can_castle = False
                     continue
                 colour = rook.colour
@@ -303,11 +311,6 @@ class King(Piece):
                     "W", "B"].index(colour.upper())]
                 for x in range(rook_pos[0]+direction, self.position[0], direction):
                     square = game_state.get_square((x, y))
-                    # TODO: fix this, basically to find out if a square is under
-                    #       attack you need to know all the moves and to find
-                    #       out if the moves legal you need to know if the
-                    #       square is under attack
-
                     if square.is_under_attack(colours=opposition_colour):
                         can_castle = False
                     piece = square.get_piece()
@@ -320,7 +323,10 @@ class King(Piece):
 
         return legal_moves
 
+    
 
+        
+        
 class Rook(Piece):
     """
     Implementation of Piece class

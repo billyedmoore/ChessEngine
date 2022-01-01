@@ -199,7 +199,8 @@ class Move(BaseMove):
         piece = square_from.get_piece()
         square_to = self._gamestate.get_square(self.position_to)
         formated_moves = [(m.position_from, m.position_to)
-                          for m in [p for p in piece.get_legal_moves(self._gamestate) if p.normal]]
+                          for m in self.gamestate.get_legal_moves(piece.colour) 
+                          if m.normal]
         return ((square_from.position, square_to.position) in formated_moves)
 
     def perform(self):

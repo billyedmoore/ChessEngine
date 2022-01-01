@@ -31,7 +31,7 @@ class RegistrationScreen(pygame.Surface):
                                          placeholder_text="confirm password", text_hidden=True),
                          Button.Button(self, w/3, h/7,
                                        (w/4+int(1/2 * (w/2-w/3))),
-                                       (h/49) * 36, text="Register",
+                                       (h/49) * 36, text="register",
                                        on_click=lambda:self.registation_attempt(
                                            self.elements[0].text,
                                            self.elements[1].text,

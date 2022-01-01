@@ -10,32 +10,28 @@ from chess_game import Game, Move
 class Board(pygame.Surface):
     down = False
 
-    def __init__(self, app, parent_surface, x, y, total_side_length,
-                 white_player=None, black_player=None,
-                 white_colour=(90, 90, 90), black_colour=(40, 40, 40),
-                 white_selected_colour=(200, 200, 200), black_selected_colour=(0, 0, 0),
+    def __init__(self, app, parent_surface, x, y, total_side_length, game,
+                 white_colour=(90, 90, 90), 
+                 black_colour=(40, 40, 40),
+                 white_selected_colour=(200, 200, 200), 
+                 black_selected_colour=(0, 0, 0),
                  online=False):
 
         self._from_pos = None
         self.app = app
         self.online = online
+        self.game = game
         self.x = x
         self.y = y
         self.square_width = total_side_length // 8
         self.black_colour = black_colour
         self.white_colour = white_colour
-        self.white_player = white_player
         self.black_selected_colour = black_selected_colour
         self.white_selected_colour = white_selected_colour
-        self.black_player = black_player
 
         # a list of moves possible for the piece currently selected
         self.possible_moves = []
 
-        if not online:
-            self.game = Game.Game(self.white_player, self.black_player)
-        else:
-            self.game = OnlineGame.OnlineGame(app)
 
         self.create_sprites()
         self.parent_surface = parent_surface
@@ -92,7 +88,7 @@ class Board(pygame.Surface):
                     piece = [p for p in self.black_pieces.sprites() if p.number ==
                              black_piece_things[x][y][1]][0]
                     piece.pos = (x, y)
-                    # piece.letter = white_piece_things[0]
+                    piece.piece_letter = black_piece_things[x][y][0]
 
         white_pieces = [p for p in self.white_pieces.sprites() if p.number not in
                         [p[1] for p in sum(white_piece_things, []) if p]]
@@ -155,7 +151,7 @@ class Board(pygame.Surface):
             elif game_over == "b":
                 body = ["Black wins, congats.",
                         "Press any key to return to the menu."]
-                self.app.open_game_over_screen()
+                self.app.open_game_over_screen(body=body)
 
         if not self.game.is_game_over:
             thread.join()
@@ -188,7 +184,6 @@ class Board(pygame.Surface):
                             self.from_pos, coord)
                         print(algebraic)
                         self.game.make_move(algebraic)
-                        # TODO handle castling moves and promotion moves
                     self.down = False
                     self.from_pos = None
 
@@ -237,6 +232,10 @@ class MoveTable(pygame.Surface):
             else:
                 white_text = "white"
                 black_text = "black(you)"
+
+        elif self.game.black_player:
+                white_text = "white(you)"
+                black_text = "black"
         else:
             white_text = "white"
             black_text = "black"
@@ -299,10 +298,16 @@ class GameScreen(pygame.Surface):
         self.surface=app.screen  # surface refers to parent surface
         remaining_width=(h - h / 4)
         menu_screen_x=((w - remaining_width) - w / 2)
-        self.board=Board(app, self, remaining_width, h / 20, w / 2,
-                           white_player=white_player, black_player=black_player, online=online)
+
+        if not online:
+            self.game = Game.Game(white_player,black_player)
+        else:
+            self.game = OnlineGame.OnlineGame(app)
+
+        self.board=Board(app, self, remaining_width, h / 20, w / 2, self.game)
         self.move_table=MoveTable(
-            app, self, menu_screen_x, h / 20, remaining_width - (1.5 * (menu_screen_x)), w / 2, self.board.game)
+            app, self, menu_screen_x, h / 20, remaining_width - 
+            (1.5 * (menu_screen_x)), w / 2, self.game)
         self.fill((255, 255, 255))
 
     def draw(self):

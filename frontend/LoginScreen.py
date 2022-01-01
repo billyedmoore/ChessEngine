@@ -10,10 +10,9 @@ class LoginScreen(pygame.Surface):
         self.app = app
         self.elements = [
             TextBox.TextBox(self, w/2, h/7, (w/4), (h/49)*7,
-                            placeholder_text="username", text="billyedmoore"),
+                            placeholder_text="username"),
             TextBox.TextBox(self, w/2, h/7, (w/4), (h/49)*16,
-                            text_hidden=True, placeholder_text="password",
-                            text="password"),
+                            text_hidden=True, placeholder_text="password"),
             # , text="password"),
             Button.Button(self, w/3, h/7, (w/4) +
                           1/2*(w/2-w/3), (h/49)*26, text="login",
