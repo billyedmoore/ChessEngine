@@ -36,9 +36,6 @@ class LoginScreen(pygame.Surface):
             self.elements[0].set_error(True)
             self.elements[1].set_error(True)
 
-    def load_register_screen(self):
-        print("That dont exist you knob")
-
     def tick(self):
         pass
 
