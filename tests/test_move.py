@@ -62,8 +62,6 @@ class TestMoveMethods(unittest.TestCase):
         """
         gs = GameState.GameState(
             fen_string="r3kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1")
-        mv = Move.CastlingMove(gs, (4, 7), "k")
-        gs.make_move(mv)
         mv = Move.CastlingMove(gs, (4, 0), "q")
         self.assertEqual(mv.to_algebraic_notation(), "O-O-O")
 
